@@ -1,14 +1,12 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
 const Header = () => {
     return (
         <div className="header">
             <header className="w-full px-8 py-4 flex items-center justify-between border-b border-gray-200 bg-white">
-                {/* Left Logo */}
-                <div className="flex items-center text-green-900 font-semibold text-lg">
-                    <span className="text-xl mr-2">🍴</span>
-                    <span>Cooksync</span>
-                </div>
+        
+                <Logo />
 
                 {/* Center Nav Links */}
                 <nav className="flex space-x-6">
@@ -19,12 +17,16 @@ const Header = () => {
 
                 {/* Right Buttons */}
                 <div className="flex items-center space-x-4">
-                    <a href="login/login.html">
-                        <button className="px-4 py-2 border border-green-700 text-green-700 font-semibold rounded hover:bg-green-100 transition">Log in</button>
-                    </a>
-                    <a href="singup/signup.html">
-                        <button className="px-4 py-2 bg-green-700 text-white font-semibold rounded hover:bg-green-800 transition">Sign up</button>
-                    </a>
+                        <Link to="/login">
+                        <button className="cursor-pointer px-4 py-2 border border-green-700 text-green-700 font-semibold rounded hover:bg-green-100 transition">
+                         Log in
+                        </button>
+                    </Link>
+                    <Link to="/signup">
+                        <button className="cursor-pointer px-4 py-2 bg-green-700 text-white font-semibold rounded hover:bg-green-800 transition">
+                         Sign up
+                        </button>
+                    </Link>
                 </div>
             </header>
         </div>
