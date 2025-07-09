@@ -1,9 +1,10 @@
 import React from 'react';
+import UserDashboard from './UserDashboard';
 
 const Main_User = () => {
     return (
         <div>
-            <h1>This is individual user profile section</h1>
+            <UserDashboard />
         </div>
     );
 };

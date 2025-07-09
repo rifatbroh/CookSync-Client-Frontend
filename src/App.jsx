@@ -21,6 +21,10 @@ import Main_User from "./Components/Dashboard/User/Main_User";
 import Settings from "./Components/Dashboard/User/Settings";
 import About from "./Pages/About";
 import Home from "./Pages/Home";
+import AllRecipes from "./Components/AllRecipes";
+import CreateRecipe from "./Components/CreateRecipe";
+import RequestChefAccess from "./Components/RequestChefAccess";
+import { ToggleFavorite } from "./Components/ToggleFavorite";
 
 const App = () => {
     return (
@@ -31,6 +35,12 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/about" element={<About />} />
+                
+                <Route path="/all" element={<AllRecipes />} />
+                <Route path="/mk" element={<CreateRecipe />} />
+                <Route path="/req" element={<RequestChefAccess />} />
+                <Route path="/to" element={<ToggleFavorite />} />
+
 
                 {/* Admin Panel  -->  http://localhost:5173/admin/dashboard */}
                 <Route path="/admin" element={<Admin_Layout />}>

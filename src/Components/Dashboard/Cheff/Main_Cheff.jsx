@@ -1,9 +1,10 @@
 import React from 'react';
+import ChefDashboard from './ChefDashboard';
 
 const Main_Cheff = () => {
     return (
         <div>
-            <h1>This is Chef dashboard</h1>
+            <ChefDashboard />
         </div>
     );
 };

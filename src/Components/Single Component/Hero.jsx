@@ -1,14 +1,18 @@
 import React from 'react';
-import heroBg from '../../assets/hero-bg.jpeg'
+import heroBg from '../../assets/hero-bg.jpeg';
 
 const Hero = () => {
     return (
         <section
-            className="bg-cover bg-center text-white text-center py-24 px-4"
+            className="relative bg-cover bg-center text-white text-center py-24 px-4"
             style={{ backgroundImage: `url(${heroBg})` }}
         >
-            <div className="max-w-2xl mx-auto">
-                <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight text-white">
+            {/* Black overlay */}
+            <div className="absolute inset-0 bg-black opacity-60"></div>
+
+            {/* Content wrapper */}
+            <div className="relative max-w-2xl mx-auto z-10">
+                <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
                     Fuel your body & soul <br />find recipes that taste amazing!
                 </h1>
                 <input

@@ -1,12 +1,14 @@
-import AllRecipes from "./AllRecipes";
-import RequestChefAccess from "./RequestChefAccess";
+import React from 'react';
+import RequestChefAccess from '../../RequestChefAccess';
+import AllRecipes from '../../AllRecipes';
 
-export default function UserDashboard() {
+const UserDashboard = () => {
     return (
         <div>
-            <h1 className="text-xl font-bold m-4">Welcome, User</h1>
             <RequestChefAccess />
             <AllRecipes />
         </div>
     );
-}
+};
+
+export default UserDashboard;
