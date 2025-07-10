@@ -1,85 +1,89 @@
-import React from 'react';
-import loginImage from '../../assets/login.jpeg';
+import { useState } from "react";
+import axios from "../../utils/axios"; // Adjust the import path as necessary
 
-const Login = () => {
+export default function LoginPage() {
+    const [email, setEmail] = useState("");
+    const [otp, setOtp] = useState("");
+    const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+
+    const handleSendOTP = async () => {
+        setLoading(true);
+        try {
+            await axios.post("/auth/send-otp", { email });
+            setMessage("OTP sent. Please check your email.");
+            setStep(2);
+        } catch (error) {
+            setMessage(error?.response?.data?.error || "Failed to send OTP");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.post("/auth/verify-otp", { email, otp });
+            localStorage.setItem("token", res.data.token);
+            setMessage("Login successful!");
+            // Redirect or trigger login state
+        } catch (error) {
+            setMessage(error?.response?.data?.error || "Verification failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div className="flex h-screen bg-gray-100">
-            {/* Left Image Section */}
-            <div className="hidden md:flex w-1/2 bg-gray-300 items-center justify-center">
-                <img src={loginImage} alt="Login" className="w-3/4 h-auto object-cover" />
-            </div>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+            <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-md space-y-6">
+                <h2 className="text-2xl font-bold text-center text-gray-800">
+                    Login
+                </h2>
 
-            {/* Right Login Section */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 py-8">
-                <div className="mb-8 text-center">
-                    <h1 className="text-4xl font-bold text-green-900">🍴CookSync</h1>
-                </div>
-
-                <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
-
-                    {/* Social Buttons */}
-                    <div className="flex flex-col gap-4 mb-6">
-                        <button className="w-full py-2 border border-gray-300 rounded font-semibold bg-white hover:bg-gray-50 transition">
-                            Login with Facebook
-                        </button>
-                        <button className="w-full py-2 border border-gray-300 rounded font-semibold bg-white hover:bg-gray-50 transition">
-                            Login with Google
-                        </button>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="flex items-center my-6">
-                        <hr className="flex-grow border-t border-gray-300" />
-                        <span className="px-4 text-gray-500 text-sm">OR</span>
-                        <hr className="flex-grow border-t border-gray-300" />
-                    </div>
-
-                    {/* Form */}
-                    <form>
-                        <div className="mb-4">
-                            <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
-                                E-mail Address
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                placeholder="Enter your e-mail"
-                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
-                            />
-                        </div>
-
-                        <div className="mb-6">
-                            <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                id="password"
-                                placeholder="Enter password"
-                                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
-                            />
-                        </div>
-
+                {step === 1 ? (
+                    <>
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                        />
                         <button
-                            type="submit"
-                            className="w-full py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600 transition"
+                            onClick={handleSendOTP}
+                            disabled={loading}
+                            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
                         >
-                            Login
+                            {loading ? "Sending..." : "Send OTP"}
                         </button>
-                    </form>
+                    </>
+                ) : (
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Enter OTP"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                        />
+                        <button
+                            onClick={handleVerifyOTP}
+                            disabled={loading}
+                            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                        >
+                            {loading ? "Verifying..." : "Verify OTP & Login"}
+                        </button>
+                    </>
+                )}
 
-                    {/* Sign-up Link */}
-                    <div className="text-center text-gray-600 mt-6">
-                        Don&apos;t have an account?{' '}
-                        <a href="../singup/signup.html" className="text-red-500 font-bold hover:underline">
-                            Sign up
-                        </a>
-                    </div>
-                </div>
+                {message && (
+                    <p className="text-center text-sm text-gray-600 mt-2">
+                        {message}
+                    </p>
+                )}
             </div>
         </div>
     );
-};
-
-export default Login;
+}
