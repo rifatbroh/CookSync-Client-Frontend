@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
-  FaCalendarCheck,
-  FaSignOutAlt,
-  FaSyringe,
   FaTachometerAlt,
+  FaSignOutAlt,
   FaUserMd,
   FaUsers,
   FaBars,
   FaTimes,
+  FaUser,
+  FaHeart,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import MenuItem from "./MenuItem";
@@ -37,6 +37,7 @@ const Admin_Sidebar = ({ role }) => {
 
   const renderMenuItems = () => {
     const currentPath = location.pathname;
+
     switch (role) {
       case "admin":
         return (
@@ -83,14 +84,14 @@ const Admin_Sidebar = ({ role }) => {
               isCollapsed={isCollapsed}
             />
             <MenuItem
-              icon={<FaCalendarCheck />}
+              icon={<FaUserMd />}
               label="Cooking"
               to="/chef/cooking"
               currentPath={currentPath}
               isCollapsed={isCollapsed}
             />
             <MenuItem
-              icon={<FaSyringe />}
+              icon={<FaUsers />}
               label="Order List"
               to="/chef/order"
               currentPath={currentPath}
@@ -104,21 +105,21 @@ const Admin_Sidebar = ({ role }) => {
           <>
             <MenuItem
               icon={<FaTachometerAlt />}
-              label="Profile"
+              label="Dashboard"
               to="/user/dashboard"
               currentPath={currentPath}
               isCollapsed={isCollapsed}
             />
             <MenuItem
-              icon={<FaCalendarCheck />}
-              label="Chat"
+              icon={<FaUser />}
+              label="Profile"
               to="/user/chat"
               currentPath={currentPath}
               isCollapsed={isCollapsed}
             />
             <MenuItem
-              icon={<FaSyringe />}
-              label="Settings"
+              icon={<FaHeart />}
+              label="My Favorites"
               to="/user/setting"
               currentPath={currentPath}
               isCollapsed={isCollapsed}

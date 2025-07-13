@@ -5,7 +5,6 @@ import {
     Routes,
 } from "react-router-dom";
 import Login from "./Components/Authentication/Login";
-import Signup from "./Components/Authentication/Signup";
 import Main_Admin from "./Components/Dashboard/Admin/Main_Admin";
 import Preferences from "./Components/Dashboard/Admin/Preferences";
 import Recipie from "./Components/Dashboard/Admin/Recipie";
@@ -33,7 +32,6 @@ const App = () => {
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
                 <Route path="/about" element={<About />} />
                 
                 <Route path="/all" element={<AllRecipes />} />
