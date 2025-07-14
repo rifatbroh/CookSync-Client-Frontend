@@ -1,9 +1,8 @@
-// Login.jsx
 import { useState } from "react";
 import Logo from "../Single Component/Logo";
 import axios from "../utils/axios";
 
-const Login = ({ onClose, navigate, onLoginSuccess }) => { // Add onLoginSuccess prop
+const Login = ({ onClose, navigate, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1);
@@ -30,20 +29,21 @@ const Login = ({ onClose, navigate, onLoginSuccess }) => { // Add onLoginSuccess
       const token = res.data.token;
       localStorage.setItem("token", token);
 
-      const profileRes = await axios.get("users/me", {
+      const profileRes = await axios.get("/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      localStorage.setItem("user", JSON.stringify(profileRes.data));
+      const userData = profileRes.data;
+      localStorage.setItem("user", JSON.stringify(userData));
 
       setMessage("🎉 Login successful!");
+
       setTimeout(() => {
-        onLoginSuccess(); // Call onLoginSuccess here
-        onClose();
-      }, 1200);
+        onLoginSuccess(userData); // pass user to Header
+        onClose(); // Close modal
+      }, 1000);
     } catch (error) {
       setMessage(error?.response?.data?.error || "❌ Verification failed");
-      // ❌ Do NOT redirect on OTP failure
     } finally {
       setLoading(false);
     }
@@ -52,6 +52,7 @@ const Login = ({ onClose, navigate, onLoginSuccess }) => { // Add onLoginSuccess
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="relative w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-fade-in">
+        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-gray-400 hover:text-red-600 text-2xl"
@@ -59,14 +60,17 @@ const Login = ({ onClose, navigate, onLoginSuccess }) => { // Add onLoginSuccess
           &times;
         </button>
 
+        {/* Logo */}
         <div className="flex justify-center mb-6">
           <Logo />
         </div>
 
+        {/* Title */}
         <h2 className="text-center text-2xl font-bold text-gray-800 mb-4">
           Welcome back to <span className="text-green-700">CookSync</span>
         </h2>
 
+        {/* Form */}
         <div className="space-y-4">
           {step === 1 ? (
             <>
@@ -104,6 +108,7 @@ const Login = ({ onClose, navigate, onLoginSuccess }) => { // Add onLoginSuccess
             </>
           )}
 
+          {/* Message Feedback */}
           {message && (
             <p className="text-center text-sm text-gray-700 mt-2 animate-pulse">
               {message}

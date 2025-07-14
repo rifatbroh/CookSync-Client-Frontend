@@ -67,6 +67,7 @@ const AllRecipes = () => {
                 `/recipes/${selectedRecipe._id}/comment`,
                 { text: comment }
             );
+            // Assuming the API returns the full comment object including user info if available
             setComments((prev) => [...prev, res.data]);
             setComment("");
         } catch (err) {
@@ -91,7 +92,7 @@ const AllRecipes = () => {
                 <div
                     key={recipe._id}
                     onClick={() => openModal(recipe._id)}
-                    className="cursor-pointer bg-white rounded-xl shadow hover:shadow-md transition duration-300 overflow-hidden"
+                    className="cursor-pointer bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
                 >
                     <img
                         src={recipe.imageUrl}
@@ -99,10 +100,10 @@ const AllRecipes = () => {
                         className="h-48 w-full object-cover"
                     />
                     <div className="p-4 space-y-2">
-                        <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
+                        <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
                             {recipe.title}
                         </h3>
-                        <p className="text-sm text-gray-500 line-clamp-2">
+                        <p className="text-sm text-gray-600 line-clamp-2">
                             {recipe.description}
                         </p>
                         <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
@@ -119,7 +120,7 @@ const AllRecipes = () => {
                             {recipe.tags?.slice(0, 3).map((tag, index) => (
                                 <span
                                     key={index}
-                                    className="text-xs bg-[#469b7e]/10 text-[#469b7e] px-2 py-0.5 rounded-full"
+                                    className="text-xs bg-[#469b7e]/10 text-[#469b7e] px-2 py-0.5 rounded-full font-medium"
                                 >
                                     #{tag}
                                 </span>
@@ -134,131 +135,148 @@ const AllRecipes = () => {
             ))}
 
             {showModal && selectedRecipe && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white max-w-lg w-full rounded-xl p-6 relative">
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn">
+                    <div className="bg-white max-w-2xl w-full max-h-[90vh] rounded-2xl p-8 relative shadow-2xl overflow-y-auto transform scale-95 animate-scaleUp">
                         <button
                             onClick={closeModal}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-black"
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-2xl transition-transform duration-200 transform hover:rotate-90"
                         >
-                            ✕
+                            &times;
                         </button>
 
                         <img
                             src={selectedRecipe.imageUrl}
                             alt={selectedRecipe.title}
-                            className="w-full h-64 object-cover rounded-md"
+                            className="w-full h-72 object-cover rounded-xl mb-6 shadow-md"
                         />
 
-                        <h2 className="text-2xl font-bold mt-4 mb-2 text-gray-800">
+                        <h2 className="text-3xl font-extrabold mt-4 mb-3 text-gray-900 border-b pb-2">
                             {selectedRecipe.title}
                         </h2>
 
-                        <p className="text-gray-600 mb-3">
+                        <p className="text-gray-700 mb-5 leading-relaxed">
                             {selectedRecipe.description}
                         </p>
 
-                        <div className="text-sm text-gray-700 space-y-1">
-                            <p>
-                                <strong>Ingredients:</strong>{" "}
-                                {selectedRecipe.ingredients.join(", ")}
-                            </p>
-                            <p>
-                                <strong>Instructions:</strong>{" "}
-                                {selectedRecipe.instructions.join(" → ")}
-                            </p>
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                            <div className="bg-gray-100 p-2 rounded-md">
-                                <p>
-                                    <strong>Prep:</strong>{" "}
-                                    {selectedRecipe.prepTime} min
-                                </p>
-                                <p>
-                                    <strong>Cook:</strong>{" "}
-                                    {selectedRecipe.cookTime} min
-                                </p>
+                        <div className="text-base text-gray-800 space-y-3 mb-6">
+                            <div>
+                                <strong className="block text-lg mb-1">Ingredients:</strong>{" "}
+                                <ul className="list-disc list-inside pl-2 grid grid-cols-1 md:grid-cols-2 gap-1">
+                                    {selectedRecipe.ingredients.map((item, index) => (
+                                        <li key={index}>{item}</li>
+                                    ))}
+                                </ul>
                             </div>
-                            <div className="bg-gray-100 p-2 rounded-md">
-                                <p>
-                                    <strong>Calories:</strong>{" "}
-                                    {selectedRecipe.nutrition?.calories}
-                                </p>
-                                <p>
-                                    <strong>Protein:</strong>{" "}
-                                    {selectedRecipe.nutrition?.protein}g
-                                </p>
-                                <p>
-                                    <strong>Carbs:</strong>{" "}
-                                    {selectedRecipe.nutrition?.carbs}g
-                                </p>
-                                <p>
-                                    <strong>Fats:</strong>{" "}
-                                    {selectedRecipe.nutrition?.fats}g
-                                </p>
+                            <div>
+                                <strong className="block text-lg mb-1">Instructions:</strong>{" "}
+                                <ol className="list-decimal list-inside pl-2 space-y-1">
+                                    {selectedRecipe.instructions.map((step, index) => (
+                                        <li key={index}>{step}</li>
+                                    ))}
+                                </ol>
                             </div>
                         </div>
 
-                        <button
-                            onClick={toggleFavorite}
-                            disabled={favoriteLoading}
-                            className={`mt-4 w-full py-2 px-4 rounded-lg font-semibold transition ${
-                                isFavorite
-                                    ? "bg-red-100 text-red-600 hover:bg-red-200"
-                                    : "bg-green-500 text-white hover:bg-green-600"
-                            } ${
-                                favoriteLoading
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                            }`}
-                        >
-                            {isFavorite
-                                ? "Remove from Favorites"
-                                : "Add to Favorites"}
-                        </button>
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <p className="text-gray-700 mb-1">
+                                    <strong className="text-gray-800">Preparation Time:</strong>{" "}
+                                    {selectedRecipe.prepTime} mins
+                                </p>
+                                <p className="text-gray-700">
+                                    <strong className="text-gray-800">Cook Time:</strong>{" "}
+                                    {selectedRecipe.cookTime} mins
+                                </p>
+                            </div>
+                            {selectedRecipe.nutrition && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <p className="text-gray-700 mb-1">
+                                        <strong className="text-gray-800">Calories:</strong>{" "}
+                                        {selectedRecipe.nutrition.calories || "N/A"} kcal
+                                    </p>
+                                    <p className="text-gray-700 mb-1">
+                                        <strong className="text-gray-800">Protein:</strong>{" "}
+                                        {selectedRecipe.nutrition.protein || "N/A"}g
+                                    </p>
+                                    <p className="text-gray-700 mb-1">
+                                        <strong className="text-gray-800">Carbs:</strong>{" "}
+                                        {selectedRecipe.nutrition.carbs || "N/A"}g
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <strong className="text-gray-800">Fats:</strong>{" "}
+                                        {selectedRecipe.nutrition.fats || "N/A"}g
+                                    </p>
+                                </div>
+                            )}
+                        </div>
 
-                        <button
-                            onClick={handleLike}
-                            className="mt-2 w-full py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-                        >
-                            Like
-                        </button>
+                        <div className="flex gap-4 mb-6">
+                            <button
+                                onClick={toggleFavorite}
+                                disabled={favoriteLoading}
+                                className={`flex-1 py-3 px-6 rounded-xl font-bold text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg ${
+                                    isFavorite
+                                        ? "bg-red-500 text-white hover:bg-red-600"
+                                        : "bg-[#469b7e] text-white hover:bg-[#377f66]"
+                                } ${
+                                    favoriteLoading
+                                        ? "opacity-60 cursor-not-allowed"
+                                        : ""
+                                }`}
+                            >
+                                {isFavorite
+                                    ? "Remove from Favorites"
+                                    : "Add to Favorites"}
+                            </button>
 
-                        <div className="mt-4">
-                            <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                                Comments
+                            <button
+                                onClick={handleLike}
+                                className="flex-1 py-3 px-6 rounded-xl font-bold text-lg bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+                            >
+                                Like Recipe
+                            </button>
+                        </div>
+
+                        <div className="mt-6 border-t pt-6">
+                            <h4 className="text-xl font-bold text-gray-900 mb-4">
+                                Comments ({comments.length})
                             </h4>
-                            <div className="space-y-2 max-h-32 overflow-y-auto">
-                                {comments.map((c) => (
-                                    <div
-                                        key={c._id}
-                                        className="flex justify-between items-center bg-gray-100 p-2 rounded"
-                                    >
-                                        <span className="text-gray-700 text-sm">
-                                            {c.text}
-                                        </span>
-                                        <button
-                                            onClick={() =>
-                                                handleDeleteComment(c._id)
-                                            }
-                                            className="text-xs text-red-500 hover:underline"
+                            <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar mb-4">
+                                {comments.length === 0 ? (
+                                    <p className="text-gray-500 text-center">No comments yet. Be the first to comment!</p>
+                                ) : (
+                                    comments.map((c) => (
+                                        <div
+                                            key={c._id}
+                                            className="flex justify-between items-center bg-gray-50 p-3 rounded-lg shadow-sm border border-gray-200"
                                         >
-                                            Delete
-                                        </button>
-                                    </div>
-                                ))}
+                                            <span className="text-gray-800 text-sm flex-grow pr-4">
+                                                {/* Assuming comment has a user or author field */}
+                                                <strong className="text-gray-900">{c.author || "Anonymous"}:</strong> {c.text}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    handleDeleteComment(c._id)
+                                                }
+                                                className="text-xs text-red-600 hover:text-red-800 font-semibold transition-colors duration-200"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                            <div className="mt-2 flex gap-2">
+                            <div className="mt-4 flex gap-3">
                                 <input
                                     type="text"
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
-                                    placeholder="Write a comment..."
-                                    className="flex-1 border border-gray-300 px-2 py-1 rounded"
+                                    placeholder="Add a comment..."
+                                    className="flex-1 border border-gray-300 focus:border-[#469b7e] focus:ring-1 focus:ring-[#469b7e] px-4 py-2 rounded-lg text-gray-700 transition-all duration-200"
                                 />
                                 <button
                                     onClick={handleAddComment}
-                                    className="bg-[#469b7e] text-white px-4 py-1 rounded hover:bg-[#377f66]"
+                                    className="bg-[#469b7e] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#377f66] transition-colors duration-200"
                                 >
                                     Post
                                 </button>
