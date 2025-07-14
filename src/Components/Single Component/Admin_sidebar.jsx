@@ -97,6 +97,13 @@ const Admin_Sidebar = ({ role }) => {
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
                         />
+                        <MenuItem
+                            icon={<FaUsers />}
+                            label="recipe"
+                            to="/chef/recipe"
+                            currentPath={currentPath}
+                            isCollapsed={isCollapsed}
+                        />
                     </>
                 );
 
