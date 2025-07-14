@@ -8,6 +8,8 @@ const AllRecipes = () => {
     const [showModal, setShowModal] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const [comment, setComment] = useState("");
+    const [comments, setComments] = useState([]);
 
     useEffect(() => {
         axios.get("/recipes").then((res) => setRecipes(res.data));
@@ -17,7 +19,9 @@ const AllRecipes = () => {
         try {
             const res = await axios.get(`/recipes/${id}`);
             setSelectedRecipe(res.data);
+            setComments(res.data.comments || []);
             setShowModal(true);
+            await axios.post(`/recipes/${id}/view`);
 
             const favRes = await axios.get("/users/favorites");
             const isFav = favRes.data.some((fav) => fav._id === id);
@@ -31,6 +35,8 @@ const AllRecipes = () => {
         setShowModal(false);
         setSelectedRecipe(null);
         setIsFavorite(false);
+        setComments([]);
+        setComment("");
     };
 
     const toggleFavorite = async () => {
@@ -43,6 +49,39 @@ const AllRecipes = () => {
             console.error("Toggle favorite failed", err);
         } finally {
             setFavoriteLoading(false);
+        }
+    };
+
+    const handleLike = async () => {
+        try {
+            await axios.post(`/recipes/${selectedRecipe._id}/like`);
+        } catch (err) {
+            console.error("Like failed", err);
+        }
+    };
+
+    const handleAddComment = async () => {
+        if (!comment.trim()) return;
+        try {
+            const res = await axios.post(
+                `/recipes/${selectedRecipe._id}/comment`,
+                { text: comment }
+            );
+            setComments((prev) => [...prev, res.data]);
+            setComment("");
+        } catch (err) {
+            console.error("Add comment failed", err);
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        try {
+            await axios.delete(
+                `/recipes/${selectedRecipe._id}/comment/${commentId}`
+            );
+            setComments((prev) => prev.filter((c) => c._id !== commentId));
+        } catch (err) {
+            console.error("Delete comment failed", err);
         }
     };
 
@@ -177,6 +216,54 @@ const AllRecipes = () => {
                                 ? "Remove from Favorites"
                                 : "Add to Favorites"}
                         </button>
+
+                        <button
+                            onClick={handleLike}
+                            className="mt-2 w-full py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                            Like
+                        </button>
+
+                        <div className="mt-4">
+                            <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                                Comments
+                            </h4>
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                                {comments.map((c) => (
+                                    <div
+                                        key={c._id}
+                                        className="flex justify-between items-center bg-gray-100 p-2 rounded"
+                                    >
+                                        <span className="text-gray-700 text-sm">
+                                            {c.text}
+                                        </span>
+                                        <button
+                                            onClick={() =>
+                                                handleDeleteComment(c._id)
+                                            }
+                                            className="text-xs text-red-500 hover:underline"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-2 flex gap-2">
+                                <input
+                                    type="text"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder="Write a comment..."
+                                    className="flex-1 border border-gray-300 px-2 py-1 rounded"
+                                />
+                                <button
+                                    onClick={handleAddComment}
+                                    className="bg-[#469b7e] text-white px-4 py-1 rounded hover:bg-[#377f66]"
+                                >
+                                    Post
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
