@@ -4,7 +4,9 @@ import {
     BrowserRouter as Router,
     Routes,
 } from "react-router-dom";
+import AllRecipes from "./Components/AllRecipes";
 import Login from "./Components/Authentication/Login";
+import CreateRecipe from "./Components/CreateRecipe";
 import Main_Admin from "./Components/Dashboard/Admin/Main_Admin";
 import Preferences from "./Components/Dashboard/Admin/Preferences";
 import Recipie from "./Components/Dashboard/Admin/Recipie";
@@ -17,13 +19,9 @@ import Cheff_layout from "./Components/Dashboard/Layout/Cheff_layout";
 import User_layout from "./Components/Dashboard/Layout/User_layout";
 import Chat from "./Components/Dashboard/User/Chat";
 import Main_User from "./Components/Dashboard/User/Main_User";
-import Settings from "./Components/Dashboard/User/Settings";
+import { ToggleFavorite } from "./Components/Dashboard/User/ToggleFavorite";
 import About from "./Pages/About";
 import Home from "./Pages/Home";
-import AllRecipes from "./Components/AllRecipes";
-import CreateRecipe from "./Components/CreateRecipe";
-import RequestChefAccess from "./Components/RequestChefAccess";
-import { ToggleFavorite } from "./Components/ToggleFavorite";
 
 const App = () => {
     return (
@@ -33,12 +31,10 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/about" element={<About />} />
-                
+
                 <Route path="/all" element={<AllRecipes />} />
                 <Route path="/mk" element={<CreateRecipe />} />
-                <Route path="/req" element={<RequestChefAccess />} />
                 <Route path="/to" element={<ToggleFavorite />} />
-
 
                 {/* Admin Panel  -->  http://localhost:5173/admin/dashboard */}
                 <Route path="/admin" element={<Admin_Layout />}>
@@ -69,7 +65,7 @@ const App = () => {
                 <Route path="/user" element={<User_layout />}>
                     <Route path="dashboard" element={<Main_User />} />
                     <Route path="chat" element={<Chat />} />
-                    <Route path="setting" element={<Settings />} />
+                    <Route path="AllRecipes" element={<AllRecipes />} />
 
                     <Route
                         index

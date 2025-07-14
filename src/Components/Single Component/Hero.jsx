@@ -1,5 +1,4 @@
-import React from 'react';
-import heroBg from '../../assets/hero-bg.jpeg';
+import heroBg from "../../assets/hero-bg.jpeg";
 
 const Hero = () => {
     return (
@@ -13,7 +12,8 @@ const Hero = () => {
             {/* Content wrapper */}
             <div className="relative max-w-2xl mx-auto z-10">
                 <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-                    Fuel your body & soul <br />find recipes that taste amazing!
+                    Fuel your body & soul <br />
+                    find recipes that taste amazing!
                 </h1>
                 <input
                     type="text"

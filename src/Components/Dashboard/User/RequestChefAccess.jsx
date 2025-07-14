@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "../utils/axios";
+import axios from "../../utils/axios";
 
 export default function RequestChefAccess() {
     const [loading, setLoading] = useState(false);
@@ -20,7 +20,9 @@ export default function RequestChefAccess() {
         <button
             onClick={request}
             disabled={loading}
-            className={`bg-purple-600 text-white p-2 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`bg-purple-600 text-white p-2 rounded ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
         >
             {loading ? "Requesting..." : "Request Chef Access"}
         </button>

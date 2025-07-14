@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "../utils/axios"; // adjust if path to utils is incorrect
+import axios from "../Components/utils/axios";
 
 export default function AdminApproveChef() {
     const [requests, setRequests] = useState([]);
@@ -27,8 +27,13 @@ export default function AdminApproveChef() {
                 <p>No pending requests</p>
             ) : (
                 requests.map((r) => (
-                    <div key={r._id} className="bg-gray-100 p-4 rounded mb-2 shadow">
-                        <p><strong>Email:</strong> {r.email}</p>
+                    <div
+                        key={r._id}
+                        className="bg-gray-100 p-4 rounded mb-2 shadow"
+                    >
+                        <p>
+                            <strong>Email:</strong> {r.email}
+                        </p>
                         <button
                             onClick={() => approve(r._id)}
                             className="bg-green-500 text-white px-3 py-1 rounded mt-2 hover:bg-green-600 transition"

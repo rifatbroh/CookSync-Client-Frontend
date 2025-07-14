@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "../utils/axios";
+import axios from "../Components/utils/axios";
 
 export default function CreateRecipe() {
     const [form, setForm] = useState({
