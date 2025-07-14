@@ -1,3 +1,4 @@
+// Header.jsx
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
@@ -10,13 +11,21 @@ const Header = () => {
   const dropdownRef = useRef();
   const navigate = useNavigate();
 
+  // This useEffect runs once on mount and when dropdownOpen changes (for click outside)
   useEffect(() => {
     const fetchUser = () => {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      setUser(storedUser);
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        setUser(storedUser);
+      } catch (error) {
+        console.error("Failed to parse user from localStorage:", error);
+        localStorage.removeItem("user"); // Clear potentially corrupt data
+        localStorage.removeItem("token");
+        setUser(null);
+      }
     };
 
-    fetchUser();
+    fetchUser(); // Initial fetch
 
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -26,38 +35,53 @@ const Header = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showLogin]); // refetch user when login modal closes
+  }, []); // Empty dependency array means it runs once on mount
+
+  // This useEffect will specifically listen for changes in user state
+  // and trigger redirection if user becomes null (e.g., after logout)
+  useEffect(() => {
+    // If the user logs out (user becomes null), navigate to the home page
+    if (user === null) {
+      navigate("/");
+    }
+  }, [user, navigate]); // Depend on user and navigate
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    setUser(null);
+    setUser(null); // This will trigger the useEffect above to navigate to "/"
     setDropdownOpen(false);
-    window.location.reload(); // or navigate("/") if you prefer
+    // window.location.reload(); // You can keep this if you prefer a full page reload on logout
   };
 
   const handleDashboard = () => {
     if (!user) return;
+    setDropdownOpen(false); // Close dropdown after clicking dashboard
     if (user.role === "admin") navigate("/admin/dashboard");
     else if (user.role === "cheff") navigate("/chef/dashboard");
     else navigate("/user/dashboard");
+  };
+
+  // This function is called ONLY on successful login from the Login component
+  const handleLoginSuccess = () => {
+    const updatedUser = JSON.parse(localStorage.getItem("user"));
+    setUser(updatedUser); // Update user state in Header
+    setShowLogin(false); // Close the login modal
+    navigate("/"); // *** Redirect to the home page after successful login ***
   };
 
   return (
     <>
       <div className={`header ${showLogin ? "backdrop-blur-sm" : ""}`}>
         <header className="w-full px-8 py-4 flex items-center justify-between border-b border-gray-200 bg-white relative z-40">
-          {/* Logo */}
           <Logo />
 
-          {/* Navigation */}
           <nav className="flex space-x-6">
             <a href="#" className="text-gray-800 font-semibold text-sm hover:text-green-700 transition">Home</a>
             <a href="#" className="text-gray-800 font-semibold text-sm hover:text-green-700 transition">Favourite</a>
             <a href="#" className="text-gray-800 font-semibold text-sm hover:text-green-700 transition">About us</a>
           </nav>
 
-          {/* Right Section */}
           <div className="flex items-center space-x-4">
             {!user ? (
               <button
@@ -96,17 +120,11 @@ const Header = () => {
         </header>
       </div>
 
-      {/* Login Modal */}
       {showLogin && (
         <Login
-          onClose={() => {
-            setShowLogin(false);
-            const updatedUser = JSON.parse(localStorage.getItem("user"));
-            setUser(updatedUser);
-            if (updatedUser?.role === "admin") navigate("/admin/dashboard");
-            else if (updatedUser?.role === "cheff") navigate("/chef/dashboard");
-            else navigate("/user/dashboard");
-          }}
+          onClose={() => setShowLogin(false)} // Simply close the modal
+          navigate={navigate} // Still pass navigate if needed elsewhere in Login
+          onLoginSuccess={handleLoginSuccess} // This now navigates to "/"
         />
       )}
     </>
