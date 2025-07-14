@@ -55,7 +55,7 @@ const App = () => {
                     <Route path="dashboard" element={<Main_Cheff />} />
                     <Route path="cooking" element={<Cooking />} />
                     <Route path="order" element={<Order_list />} />
-
+                    <Route path="recipe" 
                     <Route
                         index
                         element={<Navigate to="dashboard" replace />}
