@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import RecipeCard from "./RecipeCard";
+import RecipeCard from "../Dashboard/User/RecipeCard";
+import axios from "../utils/axios";
 
 const AllRecipes = () => {
     const [recipes, setRecipes] = useState([]);

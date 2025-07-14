@@ -19,7 +19,8 @@ import Cheff_layout from "./Components/Dashboard/Layout/Cheff_layout";
 import User_layout from "./Components/Dashboard/Layout/User_layout";
 import Chat from "./Components/Dashboard/User/Chat";
 import Main_User from "./Components/Dashboard/User/Main_User";
-import { ToggleFavorite } from "./Components/Dashboard/User/ToggleFavorite";
+import UpdatePreferencesForm from "./Components/Dashboard/User/ProfileSettings";
+import { ToggleFavorite } from "./Components/ToggleFavorite";
 import About from "./Pages/About";
 import Home from "./Pages/Home";
 
@@ -66,6 +67,12 @@ const App = () => {
                     <Route path="dashboard" element={<Main_User />} />
                     <Route path="chat" element={<Chat />} />
                     <Route path="AllRecipes" element={<AllRecipes />} />
+                    <Route
+                        path="Profole-settings"
+                        element={<UpdatePreferencesForm />}
+                    />
+
+                    {/* Default route for user dashboard */}
 
                     <Route
                         index

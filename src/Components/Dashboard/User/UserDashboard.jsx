@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "../../utils/axios";
+import UpdatePreferencesForm from "./ProfileSettings";
 import RequestChefAccess from "./RequestChefAccess";
 
 const UserDashboard = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showPreferenceModal, setShowPreferenceModal] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -61,30 +63,6 @@ const UserDashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-gray-100 p-4 rounded-lg">
-                    <h3 className="text-xl font-semibold text-gray-800">
-                        Personal Information
-                    </h3>
-                    <ul className="space-y-2 mt-4">
-                        <li className="flex justify-between text-gray-700">
-                            <span className="font-medium">ID:</span>
-                            <span>{user._id}</span>
-                        </li>
-                        <li className="flex justify-between text-gray-700">
-                            <span className="font-medium">Role:</span>
-                            <span>{user.role}</span>
-                        </li>
-                        <li className="flex justify-between text-gray-700">
-                            <span className="font-medium">
-                                Account Created:
-                            </span>
-                            <span>
-                                {new Date(user.createdAt).toLocaleDateString()}
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-
                 <div className="bg-gray-100 p-4 rounded-lg mt-4">
                     <h3 className="text-xl font-semibold text-gray-800">
                         Dietary Preferences
@@ -113,6 +91,14 @@ const UserDashboard = () => {
                             </span>
                         </li>
                     </ul>
+                    <div className="mt-4">
+                        <button
+                            onClick={() => setShowPreferenceModal(true)}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                        >
+                            Update Preferences
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bg-gray-100 p-4 rounded-lg mt-4">
@@ -133,6 +119,20 @@ const UserDashboard = () => {
                     )}
                 </div>
             </div>
+
+            {showPreferenceModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative">
+                        <button
+                            onClick={() => setShowPreferenceModal(false)}
+                            className="absolute top-2 right-2 text-gray-600 hover:text-black"
+                        >
+                            ✕
+                        </button>
+                        <UpdatePreferencesForm />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

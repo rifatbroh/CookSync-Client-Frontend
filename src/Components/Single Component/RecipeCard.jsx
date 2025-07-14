@@ -1,7 +1,7 @@
 import { Heart, HeartOff } from "lucide-react";
 import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import { ToggleFavorite } from "./ToggleFavorite";
+import { ToggleFavorite } from "../ToggleFavorite";
+import axios from "../utils/axios";
 
 const RecipeCard = ({ recipe }) => {
     const [isFavorite, setIsFavorite] = useState(false);
@@ -12,7 +12,7 @@ const RecipeCard = ({ recipe }) => {
 
         const fetchFavorites = async () => {
             try {
-                const res = await axios.get("/users/favorites");
+                const res = await axios.get("recipe/");
                 const isFav = res.data.some((fav) => fav._id === recipe._id);
                 setIsFavorite(isFav);
             } catch (err) {
