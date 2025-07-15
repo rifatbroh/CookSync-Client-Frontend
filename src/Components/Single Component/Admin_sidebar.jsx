@@ -92,14 +92,7 @@ const Admin_Sidebar = ({ role }) => {
                         />
                         <MenuItem
                             icon={<FaUsers />}
-                            label="Order List"
-                            to="/chef/order"
-                            currentPath={currentPath}
-                            isCollapsed={isCollapsed}
-                        />
-                        <MenuItem
-                            icon={<FaUsers />}
-                            label="recipe"
+                            label="Recipe"
                             to="/chef/recipe"
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
@@ -157,7 +150,10 @@ const Admin_Sidebar = ({ role }) => {
                 </div>
 
                 {!isCollapsed && (
-                    <h1 className="text-3xl font-extrabold text-white mb-4 transition duration-300 animate-pulse">
+                    <h1
+                        onClick={() => navigate("/")}
+                        className="text-3xl font-extrabold text-white mb-4 transition duration-300 animate-pulse cursor-pointer hover:text-gray-200"
+                    >
                         Cook Sync
                     </h1>
                 )}

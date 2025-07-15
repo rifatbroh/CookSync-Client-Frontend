@@ -4,7 +4,7 @@ import heroBg from "../../assets/hero-bg.jpeg";
 const Hero = () => {
     return (
         <section
-            className="relative bg-cover bg-center text-white py-20 px-6 min-h-[calc(100vh)] flex items-center justify-center"
+            className="relative bg-cover bg-center text-white py-20 px-6 min-h-screen flex items-center justify-center"
             style={{ backgroundImage: `url(${heroBg})` }}
         >
             {/* Gradient Overlay */}
