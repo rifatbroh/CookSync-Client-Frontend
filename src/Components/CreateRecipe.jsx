@@ -52,9 +52,18 @@ export default function CreateRecipe({ recipe, onDone }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const data = new FormData();
+
+        // Append form fields except image
         for (let key in form) {
-            data.append(key, form[key]);
+            if (key === "image") {
+                if (form.image instanceof File) {
+                    data.append("image", form.image);
+                }
+            } else {
+                data.append(key, form[key]);
+            }
         }
+
         data.append("ingredients", JSON.stringify(ingredients));
         data.append("instructions", JSON.stringify(instructions));
         data.append("tags", JSON.stringify(tags));
@@ -197,9 +206,18 @@ export default function CreateRecipe({ recipe, onDone }) {
                 <input
                     type="file"
                     name="image"
+                    accept="image/*"
                     onChange={handleChange}
                     className="w-full border border-gray-300 p-2 rounded"
                 />
+                {/* Image preview */}
+                {form.image && form.image instanceof File && (
+                    <img
+                        src={URL.createObjectURL(form.image)}
+                        alt="Preview"
+                        className="w-40 h-28 mt-2 object-cover rounded"
+                    />
+                )}
             </div>
 
             <button

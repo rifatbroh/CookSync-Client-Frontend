@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
-import { FaClock, FaHeart, FaUtensils } from "react-icons/fa";
+import { FaClock, FaHeart, FaTrash, FaUtensils } from "react-icons/fa";
 import axios from "../Components/utils/axios";
+
+// Helper to get user role
+const getUserRoleFromLocalStorage = () => {
+    try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        return user?.role || null;
+    } catch {
+        return null;
+    }
+};
 
 const AllRecipes = () => {
     const [recipes, setRecipes] = useState([]);
@@ -10,10 +20,17 @@ const AllRecipes = () => {
     const [favoriteLoading, setFavoriteLoading] = useState(false);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState([]);
+    const [role, setRole] = useState(null);
 
     useEffect(() => {
         axios.get("/recipes").then((res) => setRecipes(res.data));
+        setRole(getUserRoleFromLocalStorage());
     }, []);
+
+    const loadRecipes = async () => {
+        const res = await axios.get("/recipes");
+        setRecipes(res.data);
+    };
 
     const openModal = async (id) => {
         try {
@@ -67,7 +84,6 @@ const AllRecipes = () => {
                 `/recipes/${selectedRecipe._id}/comment`,
                 { text: comment }
             );
-            // Assuming the API returns the full comment object including user info if available
             setComments((prev) => [...prev, res.data]);
             setComment("");
         } catch (err) {
@@ -75,14 +91,15 @@ const AllRecipes = () => {
         }
     };
 
-    const handleDeleteComment = async (commentId) => {
+    const handleAdminDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this recipe?")) return;
         try {
-            await axios.delete(
-                `/recipes/${selectedRecipe._id}/comment/${commentId}`
-            );
-            setComments((prev) => prev.filter((c) => c._id !== commentId));
+            await axios.delete(`/api/recipes/admin/${id}`);
+            alert("🗑️ Recipe deleted successfully.");
+            await loadRecipes();
         } catch (err) {
-            console.error("Delete comment failed", err);
+            console.error("Admin delete failed", err);
+            alert("❌ Failed to delete recipe");
         }
     };
 
@@ -91,13 +108,13 @@ const AllRecipes = () => {
             {recipes.map((recipe) => (
                 <div
                     key={recipe._id}
-                    onClick={() => openModal(recipe._id)}
-                    className="cursor-pointer bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
+                    className="relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:scale-105"
                 >
                     <img
                         src={recipe.imageUrl}
                         alt={recipe.title}
-                        className="h-48 w-full object-cover"
+                        onClick={() => openModal(recipe._id)}
+                        className="cursor-pointer h-48 w-full object-cover"
                     />
                     <div className="p-4 space-y-2">
                         <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
@@ -131,9 +148,19 @@ const AllRecipes = () => {
                             {recipe.likes?.length || 0} likes
                         </div>
                     </div>
+
+                    {role === "admin" && (
+                        <button
+                            onClick={() => handleAdminDelete(recipe._id)}
+                            className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition"
+                        >
+                            <FaTrash />
+                        </button>
+                    )}
                 </div>
             ))}
 
+            {/* Modal (kept unchanged) */}
             {showModal && selectedRecipe && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="bg-white max-w-2xl w-full max-h-[90vh] rounded-2xl p-8 relative shadow-2xl overflow-y-auto transform scale-95 animate-scaleUp">
@@ -160,19 +187,27 @@ const AllRecipes = () => {
 
                         <div className="text-base text-gray-800 space-y-3 mb-6">
                             <div>
-                                <strong className="block text-lg mb-1">Ingredients:</strong>{" "}
+                                <strong className="block text-lg mb-1">
+                                    Ingredients:
+                                </strong>{" "}
                                 <ul className="list-disc list-inside pl-2 grid grid-cols-1 md:grid-cols-2 gap-1">
-                                    {selectedRecipe.ingredients.map((item, index) => (
-                                        <li key={index}>{item}</li>
-                                    ))}
+                                    {selectedRecipe.ingredients.map(
+                                        (item, index) => (
+                                            <li key={index}>{item}</li>
+                                        )
+                                    )}
                                 </ul>
                             </div>
                             <div>
-                                <strong className="block text-lg mb-1">Instructions:</strong>{" "}
+                                <strong className="block text-lg mb-1">
+                                    Instructions:
+                                </strong>{" "}
                                 <ol className="list-decimal list-inside pl-2 space-y-1">
-                                    {selectedRecipe.instructions.map((step, index) => (
-                                        <li key={index}>{step}</li>
-                                    ))}
+                                    {selectedRecipe.instructions.map(
+                                        (step, index) => (
+                                            <li key={index}>{step}</li>
+                                        )
+                                    )}
                                 </ol>
                             </div>
                         </div>
@@ -180,31 +215,50 @@ const AllRecipes = () => {
                         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <p className="text-gray-700 mb-1">
-                                    <strong className="text-gray-800">Preparation Time:</strong>{" "}
+                                    <strong className="text-gray-800">
+                                        Preparation Time:
+                                    </strong>{" "}
                                     {selectedRecipe.prepTime} mins
                                 </p>
                                 <p className="text-gray-700">
-                                    <strong className="text-gray-800">Cook Time:</strong>{" "}
+                                    <strong className="text-gray-800">
+                                        Cook Time:
+                                    </strong>{" "}
                                     {selectedRecipe.cookTime} mins
                                 </p>
                             </div>
                             {selectedRecipe.nutrition && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <p className="text-gray-700 mb-1">
-                                        <strong className="text-gray-800">Calories:</strong>{" "}
-                                        {selectedRecipe.nutrition.calories || "N/A"} kcal
+                                        <strong className="text-gray-800">
+                                            Calories:
+                                        </strong>{" "}
+                                        {selectedRecipe.nutrition.calories ||
+                                            "N/A"}{" "}
+                                        kcal
                                     </p>
                                     <p className="text-gray-700 mb-1">
-                                        <strong className="text-gray-800">Protein:</strong>{" "}
-                                        {selectedRecipe.nutrition.protein || "N/A"}g
+                                        <strong className="text-gray-800">
+                                            Protein:
+                                        </strong>{" "}
+                                        {selectedRecipe.nutrition.protein ||
+                                            "N/A"}
+                                        g
                                     </p>
                                     <p className="text-gray-700 mb-1">
-                                        <strong className="text-gray-800">Carbs:</strong>{" "}
-                                        {selectedRecipe.nutrition.carbs || "N/A"}g
+                                        <strong className="text-gray-800">
+                                            Carbs:
+                                        </strong>{" "}
+                                        {selectedRecipe.nutrition.carbs ||
+                                            "N/A"}
+                                        g
                                     </p>
                                     <p className="text-gray-700">
-                                        <strong className="text-gray-800">Fats:</strong>{" "}
-                                        {selectedRecipe.nutrition.fats || "N/A"}g
+                                        <strong className="text-gray-800">
+                                            Fats:
+                                        </strong>{" "}
+                                        {selectedRecipe.nutrition.fats || "N/A"}
+                                        g
                                     </p>
                                 </div>
                             )}
@@ -243,7 +297,10 @@ const AllRecipes = () => {
                             </h4>
                             <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar mb-4">
                                 {comments.length === 0 ? (
-                                    <p className="text-gray-500 text-center">No comments yet. Be the first to comment!</p>
+                                    <p className="text-gray-500 text-center">
+                                        No comments yet. Be the first to
+                                        comment!
+                                    </p>
                                 ) : (
                                     comments.map((c) => (
                                         <div
@@ -252,16 +309,11 @@ const AllRecipes = () => {
                                         >
                                             <span className="text-gray-800 text-sm flex-grow pr-4">
                                                 {/* Assuming comment has a user or author field */}
-                                                <strong className="text-gray-900">{c.author || "Anonymous"}:</strong> {c.text}
+                                                <strong className="text-gray-900">
+                                                    {c.author || "Anonymous"}:
+                                                </strong>{" "}
+                                                {c.text}
                                             </span>
-                                            <button
-                                                onClick={() =>
-                                                    handleDeleteComment(c._id)
-                                                }
-                                                className="text-xs text-red-600 hover:text-red-800 font-semibold transition-colors duration-200"
-                                            >
-                                                Delete
-                                            </button>
                                         </div>
                                     ))
                                 )}
