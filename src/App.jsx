@@ -21,6 +21,7 @@ import Chat from "./Components/Dashboard/User/Chat";
 import Main_User from "./Components/Dashboard/User/Main_User";
 import UpdatePreferencesForm from "./Components/Dashboard/User/ProfileSettings";
 import { ToggleFavorite } from "./Components/ToggleFavorite";
+import UserFavorites from "./Components/UserFavorites";
 import About from "./Pages/About";
 import Home from "./Pages/Home";
 
@@ -55,7 +56,7 @@ const App = () => {
                     <Route path="dashboard" element={<Main_Cheff />} />
                     <Route path="cooking" element={<Cooking />} />
                     <Route path="order" element={<Order_list />} />
-                    <Route path="recipe" element={<CreateRecipe />} />
+                    <Route path="recipe" element={<UserFavorites />} />
 
                     <Route
                         index
