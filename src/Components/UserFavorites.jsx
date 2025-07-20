@@ -89,20 +89,6 @@ export default function UserFavorites() {
                             <p className="text-sm text-gray-600 flex-1">
                                 {recipe.description}
                             </p>
-                            <div className="mt-4 flex gap-2">
-                                <button
-                                    onClick={() => openEditModal(recipe)}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(recipe._id)}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                                >
-                                    Delete
-                                </button>
-                            </div>
                         </div>
                     ))}
                 </div>
