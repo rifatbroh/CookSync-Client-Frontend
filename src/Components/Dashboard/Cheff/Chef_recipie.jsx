@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaClock, FaHeart, FaTrash, FaUtensils } from "react-icons/fa";
-import axios from "../Components/utils/axios";
+import axios from "../../utils/axios";
 
 // Helpers
 const getUserFromLocalStorage = () => {
@@ -11,7 +11,7 @@ const getUserFromLocalStorage = () => {
     }
 };
 
-const AllRecipes = () => {
+const Chef_recipie = () => {
     const [recipes, setRecipes] = useState([]);
     const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -346,4 +346,4 @@ const AllRecipes = () => {
     );
 };
 
-export default AllRecipes;
+export default Chef_recipie;

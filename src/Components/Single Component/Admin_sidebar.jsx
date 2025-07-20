@@ -63,13 +63,6 @@ const Admin_Sidebar = ({ role }) => {
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
                         />
-                        <MenuItem
-                            icon={<FaUsers />}
-                            label="Preferences"
-                            to="/admin/preferences"
-                            currentPath={currentPath}
-                            isCollapsed={isCollapsed}
-                        />
                     </>
                 );
 

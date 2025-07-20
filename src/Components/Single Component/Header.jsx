@@ -12,7 +12,7 @@ const Header = () => {
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    setUser(storedUser);
+    if (storedUser) setUser(storedUser);
 
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -22,18 +22,14 @@ const Header = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showLogin]);
-
-  useEffect(() => {
-    if (user === null) navigate("/");
-  }, [user, navigate]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setUser(null);
     setDropdownOpen(false);
-    window.location.reload();
+    navigate("/"); // ✅ logout goes to home
   };
 
   const handleDashboard = () => {
@@ -49,10 +45,7 @@ const Header = () => {
     const updatedUser = JSON.parse(localStorage.getItem("user"));
     setUser(updatedUser);
     setShowLogin(false);
-    const role = updatedUser?.role?.toLowerCase();
-    if (role === "admin") navigate("/admin/dashboard");
-    else if (role === "chef") navigate("/chef/dashboard");
-    else navigate("/user/dashboard");
+    navigate("/"); // ✅ login always goes to home
   };
 
   return (
@@ -78,7 +71,7 @@ const Header = () => {
           </a>
         </nav>
 
-        {/* Auth */}
+        {/* Auth Section */}
         <div className="flex items-center space-x-4">
           {!user ? (
             <button
@@ -90,7 +83,10 @@ const Header = () => {
           ) : (
             <div className="relative" ref={dropdownRef}>
               <img
-                src={user.profileImage || "https://i.pinimg.com/736x/3b/f9/7c/3bf97c640b8732a64ab73b653f622582.jpg"}
+                src={
+                  user.profileImage ||
+                  "https://i.pinimg.com/736x/3b/f9/7c/3bf97c640b8732a64ab73b653f622582.jpg"
+                }
                 alt="Profile"
                 className="w-10 h-10 rounded-full cursor-pointer border-2 border-white hover:scale-105 transition-transform duration-200"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -116,6 +112,7 @@ const Header = () => {
         </div>
       </header>
 
+      {/* Login Modal */}
       {showLogin && (
         <Login
           onClose={() => setShowLogin(false)}

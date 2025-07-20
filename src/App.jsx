@@ -8,7 +8,6 @@ import AllRecipes from "./Components/AllRecipes";
 import Login from "./Components/Authentication/Login";
 import CreateRecipe from "./Components/CreateRecipe";
 import Main_Admin from "./Components/Dashboard/Admin/Main_Admin";
-import Preferences from "./Components/Dashboard/Admin/Preferences";
 import Recipie from "./Components/Dashboard/Admin/Recipie";
 import User from "./Components/Dashboard/Admin/User";
 import Cooking from "./Components/Dashboard/Cheff/Cooking";
@@ -24,6 +23,9 @@ import { ToggleFavorite } from "./Components/ToggleFavorite";
 import UserFavorites from "./Components/UserFavorites";
 import About from "./Pages/About";
 import Home from "./Pages/Home";
+import Chef_recipie from "./Components/Dashboard/Cheff/chef_recipie";
+import Recipie_module from "./Components/Dashboard/Cheff/Recipie_module";
+
 
 const App = () => {
     return (
@@ -33,6 +35,7 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/about" element={<About />} />
+                
 
                 <Route path="/all" element={<AllRecipes />} />
                 <Route path="/mk" element={<CreateRecipe />} />
@@ -43,7 +46,6 @@ const App = () => {
                     <Route path="dashboard" element={<Main_Admin />} />
                     <Route path="recipie" element={<Recipie />} />
                     <Route path="user" element={<User />} />
-                    <Route path="preferences" element={<Preferences />} />
 
                     <Route
                         index
@@ -56,7 +58,7 @@ const App = () => {
                     <Route path="dashboard" element={<Main_Cheff />} />
                     <Route path="cooking" element={<Cooking />} />
                     <Route path="order" element={<Order_list />} />
-                    <Route path="recipe" element={<UserFavorites />} />
+                    <Route path="recipe" element={<Recipie_module/>}/>
 
                     <Route
                         index
