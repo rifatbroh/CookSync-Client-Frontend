@@ -1,4 +1,3 @@
-// CreateRecipe.js
 import { useState } from "react";
 import axios from "../Components/utils/axios";
 
@@ -70,11 +69,17 @@ export default function CreateRecipe({ recipe, onDone }) {
         data.append("nutrition", JSON.stringify(nutrition));
 
         try {
+            const config = {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            };
+
             if (recipe?._id) {
-                await axios.put(`/recipes/${recipe._id}`, data);
+                await axios.put(`/recipes/${recipe._id}`, data, config);
                 alert("✅ Recipe updated");
             } else {
-                await axios.post("/recipes", data);
+                await axios.post("/recipes", data, config);
                 alert("✅ Recipe created");
             }
             if (onDone) onDone(); // close modal & refresh
