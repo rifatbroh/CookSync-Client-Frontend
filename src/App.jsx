@@ -13,6 +13,7 @@ import User from "./Components/Dashboard/Admin/User";
 import Cooking from "./Components/Dashboard/Cheff/Cooking";
 import Main_Cheff from "./Components/Dashboard/Cheff/Main_Cheff";
 import Order_list from "./Components/Dashboard/Cheff/Order_list";
+import Recipie_module from "./Components/Dashboard/Cheff/Recipie_module";
 import Admin_Layout from "./Components/Dashboard/Layout/Admin_layout";
 import Cheff_layout from "./Components/Dashboard/Layout/Cheff_layout";
 import User_layout from "./Components/Dashboard/Layout/User_layout";
@@ -20,12 +21,8 @@ import Chat from "./Components/Dashboard/User/Chat";
 import Main_User from "./Components/Dashboard/User/Main_User";
 import UpdatePreferencesForm from "./Components/Dashboard/User/ProfileSettings";
 import { ToggleFavorite } from "./Components/ToggleFavorite";
-import UserFavorites from "./Components/UserFavorites";
 import About from "./Pages/About";
 import Home from "./Pages/Home";
-import Chef_recipie from "./Components/Dashboard/Cheff/chef_recipie";
-import Recipie_module from "./Components/Dashboard/Cheff/Recipie_module";
-
 
 const App = () => {
     return (
@@ -35,7 +32,6 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/about" element={<About />} />
-                
 
                 <Route path="/all" element={<AllRecipes />} />
                 <Route path="/mk" element={<CreateRecipe />} />
@@ -58,7 +54,7 @@ const App = () => {
                     <Route path="dashboard" element={<Main_Cheff />} />
                     <Route path="cooking" element={<Cooking />} />
                     <Route path="order" element={<Order_list />} />
-                    <Route path="recipe" element={<Recipie_module/>}/>
+                    <Route path="recipe" element={<Recipie_module />} />
 
                     <Route
                         index

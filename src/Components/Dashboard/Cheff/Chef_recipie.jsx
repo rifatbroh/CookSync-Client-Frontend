@@ -21,22 +21,35 @@ const Chef_recipie = () => {
     const [comments, setComments] = useState([]);
     const [role, setRole] = useState(null);
 
+    // Get user from localStorage and set role
     useEffect(() => {
         const user = getUserFromLocalStorage();
         if (user?.id) {
-            axios.get(`/chef/${user.id}`).then((res) => setRecipes(res.data));
+            setRole(user?.role || null);
+            loadRecipes(user?.id, user?.token); // Pass the token here
         }
-        setRole(user?.role || null);
     }, []);
 
-    const loadRecipes = async () => {
-        const user = getUserFromLocalStorage();
-        if (!user?.id) return;
+    // Function to load recipes
+    const loadRecipes = async (userId, token) => {
+        if (!userId) return;
 
-        const res = await axios.get(`/chef/${user.id}`);
-        setRecipes(res.data);
+        try {
+            const res = await axios.get(`/api/recipes/chef/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (res.status !== 200) {
+                throw new Error("Failed to fetch recipes");
+            }
+            setRecipes(res.data);
+        } catch (error) {
+            console.error("Failed to load recipes", error);
+        }
     };
 
+    // Function to open modal
     const openModal = async (id) => {
         try {
             const res = await axios.get(`/recipes/${id}`);
@@ -44,8 +57,10 @@ const Chef_recipie = () => {
             setComments(res.data.comments || []);
             setShowModal(true);
 
+            // Mark as viewed
             await axios.post(`/recipes/${id}/view`);
 
+            // Check if recipe is favorited
             const favRes = await axios.get("/users/favorites");
             const isFav = favRes.data.some((fav) => fav._id === id);
             setIsFavorite(isFav);
@@ -54,6 +69,7 @@ const Chef_recipie = () => {
         }
     };
 
+    // Close modal function
     const closeModal = () => {
         setShowModal(false);
         setSelectedRecipe(null);
@@ -62,6 +78,7 @@ const Chef_recipie = () => {
         setComment("");
     };
 
+    // Toggle favorite status
     const toggleFavorite = async () => {
         if (!selectedRecipe?._id) return;
         setFavoriteLoading(true);
@@ -75,6 +92,7 @@ const Chef_recipie = () => {
         }
     };
 
+    // Handle like recipe
     const handleLike = async () => {
         try {
             await axios.post(`/recipes/${selectedRecipe._id}/like`);
@@ -83,6 +101,7 @@ const Chef_recipie = () => {
         }
     };
 
+    // Handle adding a comment
     const handleAddComment = async () => {
         if (!comment.trim()) return;
         try {
@@ -97,12 +116,13 @@ const Chef_recipie = () => {
         }
     };
 
+    // Admin delete recipe
     const handleAdminDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this recipe?")) return;
         try {
             await axios.delete(`/api/recipes/admin/${id}`);
             alert("🗑️ Recipe deleted successfully.");
-            await loadRecipes();
+            await loadRecipes(); // Reload recipes after deletion
         } catch (err) {
             console.error("Admin delete failed", err);
             alert("❌ Failed to delete recipe");
@@ -218,58 +238,7 @@ const Chef_recipie = () => {
                             </div>
                         </div>
 
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <p className="text-gray-700 mb-1">
-                                    <strong className="text-gray-800">
-                                        Preparation Time:
-                                    </strong>{" "}
-                                    {selectedRecipe.prepTime} mins
-                                </p>
-                                <p className="text-gray-700">
-                                    <strong className="text-gray-800">
-                                        Cook Time:
-                                    </strong>{" "}
-                                    {selectedRecipe.cookTime} mins
-                                </p>
-                            </div>
-                            {selectedRecipe.nutrition && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <p className="text-gray-700 mb-1">
-                                        <strong className="text-gray-800">
-                                            Calories:
-                                        </strong>{" "}
-                                        {selectedRecipe.nutrition.calories ||
-                                            "N/A"}{" "}
-                                        kcal
-                                    </p>
-                                    <p className="text-gray-700 mb-1">
-                                        <strong className="text-gray-800">
-                                            Protein:
-                                        </strong>{" "}
-                                        {selectedRecipe.nutrition.protein ||
-                                            "N/A"}{" "}
-                                        g
-                                    </p>
-                                    <p className="text-gray-700 mb-1">
-                                        <strong className="text-gray-800">
-                                            Carbs:
-                                        </strong>{" "}
-                                        {selectedRecipe.nutrition.carbs ||
-                                            "N/A"}{" "}
-                                        g
-                                    </p>
-                                    <p className="text-gray-700">
-                                        <strong className="text-gray-800">
-                                            Fats:
-                                        </strong>{" "}
-                                        {selectedRecipe.nutrition.fats || "N/A"}{" "}
-                                        g
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
+                        {/* Modal Actions */}
                         <div className="flex gap-4 mb-6">
                             <button
                                 onClick={toggleFavorite}
@@ -297,6 +266,7 @@ const Chef_recipie = () => {
                             </button>
                         </div>
 
+                        {/* Comments Section */}
                         <div className="mt-6 border-t pt-6">
                             <h4 className="text-xl font-bold text-gray-900 mb-4">
                                 Comments ({comments.length})
