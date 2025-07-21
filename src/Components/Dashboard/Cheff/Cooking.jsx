@@ -17,7 +17,7 @@ const CookingSessionManager = () => {
         loadUserFromLocalStorage();
     }, []);
 
-    // When chefId is available, fetch data and setup WS
+    // When chefId is available, fetch data and setup WebSocket
     useEffect(() => {
         if (chefId) {
             fetchActiveSessions();
@@ -25,7 +25,7 @@ const CookingSessionManager = () => {
             setupWebSocket();
         }
 
-        // Cleanup WS on unmount or when chefId changes
+        // Cleanup WebSocket on unmount or when chefId changes
         return () => {
             if (socketRef.current) {
                 socketRef.current.close();
@@ -36,17 +36,21 @@ const CookingSessionManager = () => {
 
     // Setup WebSocket connection and handlers
     const setupWebSocket = () => {
-        if (socketRef.current) return; // Already connected
+        if (socketRef.current) return; // Skip if WebSocket already initialized
 
-        const WS_URL = "ws://localhost:5000/ws";
+        const WS_URL =
+            process.env.NODE_ENV === "production"
+                ? "wss://your-production-url/ws"
+                : "ws://localhost:5000/ws";
+
         socketRef.current = new WebSocket(WS_URL);
 
         socketRef.current.onopen = () => {
             console.log("WebSocket connected");
-            // Identify yourself to the server
+            // Send identification message once connected
             socketRef.current.send(
                 JSON.stringify({
-                    type: "IDENTIFY",
+                    type: "IDENTIFY", // This should match the backend expectation
                     userId: chefId,
                     role: userRole,
                 })
@@ -57,18 +61,19 @@ const CookingSessionManager = () => {
             try {
                 const data = JSON.parse(event.data);
 
-                if (data.type === "ACTIVE_SESSIONS") {
-                    setActiveSessions(data.sessions);
+                switch (data.type) {
+                    case "ACTIVE_SESSIONS":
+                        setActiveSessions(data.sessions);
+                        break;
+                    case "NEW_STEP":
+                        if (data.sessionId === selectedRecipeId) {
+                            setSteps((prev) => [...prev, data.step]);
+                        }
+                        break;
+                    default:
+                        console.warn("Unhandled message type:", data.type);
+                        break;
                 }
-
-                if (
-                    data.type === "NEW_STEP" &&
-                    data.sessionId === selectedRecipeId
-                ) {
-                    setSteps((prev) => [...prev, data.step]);
-                }
-
-                // Add more handlers here if needed
             } catch (err) {
                 console.error("Error parsing WS message", err);
             }
