@@ -71,6 +71,7 @@ const App = () => {
                         path="Profole-settings"
                         element={<UpdatePreferencesForm />}
                     />
+                    <Route path="cooking" element={<Cooking />} />
 
                     {/* Default route for user dashboard */}
 

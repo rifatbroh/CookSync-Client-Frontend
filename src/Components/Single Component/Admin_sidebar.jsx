@@ -5,7 +5,6 @@ import {
     FaSignOutAlt,
     FaTachometerAlt,
     FaTimes,
-    FaUser,
     FaUserMd,
     FaUsers,
 } from "react-icons/fa";
@@ -117,13 +116,13 @@ const Admin_Sidebar = ({ role }) => {
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
                         />
-                        {/* <MenuItem
+                        <MenuItem
                             icon={<FaUserMd />}
                             label="Cooking"
-                            to="/chef/cooking"
+                            to="/user/cooking"
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
-                        /> */}
+                        />
                     </>
                 );
 
