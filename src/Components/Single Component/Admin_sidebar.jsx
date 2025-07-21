@@ -103,13 +103,13 @@ const Admin_Sidebar = ({ role }) => {
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
                         />
-                        <MenuItem
+                        {/* <MenuItem
                             icon={<FaUser />}
                             label="Profile"
                             to="/user/chat"
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
-                        />
+                        /> */}
                         <MenuItem
                             icon={<FaHeart />}
                             label="My Favorites"
@@ -117,13 +117,13 @@ const Admin_Sidebar = ({ role }) => {
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
                         />
-                        <MenuItem
+                        {/* <MenuItem
                             icon={<FaUserMd />}
                             label="Cooking"
                             to="/chef/cooking"
                             currentPath={currentPath}
                             isCollapsed={isCollapsed}
-                        />
+                        /> */}
                     </>
                 );
 
