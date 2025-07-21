@@ -1,65 +1,81 @@
 import { useEffect, useState } from "react";
 import axios from "../Components/utils/axios";
 
-export default function AdminApproveChef() {
+const AdminApproveChef = () => {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [actionLoadingId, setActionLoadingId] = useState(null); // for button loading state
+    const [approveLoadingId, setApproveLoadingId] = useState(null);
+    const [rejectLoadingId, setRejectLoadingId] = useState(null);
+
+    // Fetch requests
+    const fetchRequests = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get("/users/admin/chef-requests");
+            setRequests(res.data);
+            setError(null);
+        } catch (err) {
+            console.error("Error fetching chef requests:", err);
+            setError("Failed to load chef requests. Try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        axios
-            .get("/users/admin/chef-requests")
-            .then((res) => {
-                setRequests(res.data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Failed to fetch chef requests:", err);
-                setError(
-                    "Failed to load chef requests. Please try again later."
-                );
-                setLoading(false);
-            });
+        fetchRequests();
     }, []);
 
+    // Alert + Callback
+    const notifyAndUpdate = (message, onUpdate) => {
+        alert(message);
+        if (typeof onUpdate === "function") {
+            onUpdate();
+        }
+    };
+
     const approve = async (id) => {
-        setActionLoadingId(id);
+        setApproveLoadingId(id);
         try {
-            await axios.patch(`/users/admin/approve-chef/${id}`);
-            setRequests((prev) => prev.filter((r) => r._id !== id));
-            alert("Chef approved successfully");
+            const res = await axios.patch(`/users/admin/approve-chef/${id}`);
+            if (res.status === 200 || res.status === 204) {
+                notifyAndUpdate("✅ Chef approved successfully", fetchRequests);
+            } else {
+                alert("⚠️ Unexpected server response.");
+            }
         } catch (err) {
-            console.error("Failed to approve:", err);
-            alert("Failed to approve chef. Please try again.");
+            console.error("Approval error:", err);
+            alert("❌ Failed to approve chef. Please try again.");
         } finally {
-            setActionLoadingId(null);
+            setApproveLoadingId(null);
         }
     };
 
     const reject = async (id) => {
-        const confirmReject = window.confirm(
-            "Are you sure you want to reject this chef request?"
-        );
+        const confirmReject = window.confirm("Are you sure you want to reject this chef?");
         if (!confirmReject) return;
 
-        setActionLoadingId(id);
+        setRejectLoadingId(id);
         try {
-            await axios.patch(`/users/admin/reject-chef/${id}`);
-            setRequests((prev) => prev.filter((r) => r._id !== id));
-            alert("Chef request rejected");
+            const res = await axios.patch(`/users/admin/reject-chef/${id}`);
+            if (res.status === 200 || res.status === 204) {
+                notifyAndUpdate("✅ Chef request rejected", fetchRequests);
+            } else {
+                alert("⚠️ Unexpected server response.");
+            }
         } catch (err) {
-            console.error("Failed to reject:", err);
-            alert("Failed to reject chef. Please try again.");
+            console.error("Rejection error:", err);
+            alert("❌ Failed to reject chef. Please try again.");
         } finally {
-            setActionLoadingId(null);
+            setRejectLoadingId(null);
         }
     };
 
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="text-xl font-semibold text-gray-700">
+                <div className="text-lg font-medium text-gray-600">
                     Loading pending chef requests...
                 </div>
             </div>
@@ -69,40 +85,22 @@ export default function AdminApproveChef() {
     if (error) {
         return (
             <div className="flex justify-center items-center h-screen bg-red-50">
-                <div className="text-xl font-semibold text-red-700">
-                    {error}
-                </div>
+                <div className="text-lg font-medium text-red-700">{error}</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 sm:p-10">
-            <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6 sm:p-8">
-                <h2 className="text-3xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-green-600">
+        <div className="min-h-screen bg-gray-100 py-10 px-4 sm:px-8">
+            <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+                <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-3">
                     Pending Chef Applications
-                </h2>
+                </h1>
 
                 {requests.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 bg-green-50 rounded-lg border-2 border-green-200">
-                        <svg
-                            className="w-16 h-16 text-green-500 mb-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                        </svg>
-                        <p className="text-xl font-medium text-green-800">
-                            No pending chef requests at the moment!
-                        </p>
-                        <p className="text-gray-600 mt-2">
+                    <div className="bg-green-50 text-green-800 border border-green-200 p-6 rounded-lg text-center">
+                        <p className="text-xl font-medium">No pending chef requests.</p>
+                        <p className="text-sm text-gray-600 mt-2">
                             All applications have been reviewed.
                         </p>
                     </div>
@@ -111,52 +109,42 @@ export default function AdminApproveChef() {
                         {requests.map((r) => (
                             <div
                                 key={r._id}
-                                className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-200 ease-in-out flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                                className="bg-white border p-5 rounded-lg shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between"
                             >
-                                <div className="mb-3 sm:mb-0">
-                                    <p className="text-lg font-semibold text-gray-600">
-                                        Email:{" "}
-                                        <span className="font-medium">
-                                            {r.email}
-                                        </span>
+                                <div>
+                                    <p className="font-semibold text-gray-700">
+                                        Email: <span className="font-medium">{r.email}</span>
                                     </p>
                                     {r.bio && (
-                                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                                        <p className="text-sm text-gray-600 mt-1">
                                             Bio: "{r.bio}"
                                         </p>
                                     )}
                                     {r.experience && (
-                                        <p className="text-sm text-gray-500 mt-1">
+                                        <p className="text-sm text-gray-600">
                                             Experience: {r.experience} years
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex gap-3">
+
+                                <div className="flex gap-3 mt-4 sm:mt-0">
                                     <button
                                         onClick={() => approve(r._id)}
-                                        disabled={actionLoadingId === r._id}
-                                        className={`px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-200 ease-in-out transform hover:scale-105 ${
-                                            actionLoadingId === r._id
-                                                ? "opacity-50 cursor-not-allowed"
-                                                : ""
+                                        disabled={approveLoadingId === r._id}
+                                        className={`px-5 py-2 rounded-md text-white font-semibold bg-green-500 hover:bg-green-600 transition ${
+                                            approveLoadingId === r._id ? "opacity-50 cursor-not-allowed" : ""
                                         }`}
                                     >
-                                        {actionLoadingId === r._id
-                                            ? "Approving..."
-                                            : "Approve Chef"}
+                                        {approveLoadingId === r._id ? "Approving..." : "Approve"}
                                     </button>
                                     <button
                                         onClick={() => reject(r._id)}
-                                        disabled={actionLoadingId === r._id}
-                                        className={`px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 transition-all duration-200 ease-in-out transform hover:scale-105 ${
-                                            actionLoadingId === r._id
-                                                ? "opacity-50 cursor-not-allowed"
-                                                : ""
+                                        disabled={rejectLoadingId === r._id}
+                                        className={`px-5 py-2 rounded-md text-white font-semibold bg-red-500 hover:bg-red-600 transition ${
+                                            rejectLoadingId === r._id ? "opacity-50 cursor-not-allowed" : ""
                                         }`}
                                     >
-                                        {actionLoadingId === r._id
-                                            ? "Rejecting..."
-                                            : "Reject Chef"}
+                                        {rejectLoadingId === r._id ? "Rejecting..." : "Reject"}
                                     </button>
                                 </div>
                             </div>
@@ -166,4 +154,6 @@ export default function AdminApproveChef() {
             </div>
         </div>
     );
-}
+};
+
+export default AdminApproveChef;

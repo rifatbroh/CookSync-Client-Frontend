@@ -12,7 +12,6 @@ import Recipie from "./Components/Dashboard/Admin/Recipie";
 import User from "./Components/Dashboard/Admin/User";
 import Cooking from "./Components/Dashboard/Cheff/Cooking";
 import Main_Cheff from "./Components/Dashboard/Cheff/Main_Cheff";
-import Order_list from "./Components/Dashboard/Cheff/Order_list";
 import Recipie_module from "./Components/Dashboard/Cheff/Recipie_module";
 import Admin_Layout from "./Components/Dashboard/Layout/Admin_layout";
 import Cheff_layout from "./Components/Dashboard/Layout/Cheff_layout";
@@ -53,7 +52,6 @@ const App = () => {
                 <Route path="/chef" element={<Cheff_layout />}>
                     <Route path="dashboard" element={<Main_Cheff />} />
                     <Route path="cooking" element={<Cooking />} />
-                    <Route path="order" element={<Order_list />} />
                     <Route path="recipe" element={<Recipie_module />} />
 
                     <Route

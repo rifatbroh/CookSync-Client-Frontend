@@ -9,21 +9,21 @@ const UserDashboard = () => {
   const [error, setError] = useState(null);
   const [showPreferenceModal, setShowPreferenceModal] = useState(false);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const profileRes = await axios.get("/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(profileRes.data);
-      } catch (error) {
-        setError("Failed to fetch user data");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const profileRes = await axios.get("/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(profileRes.data);
+    } catch (error) {
+      setError("Failed to fetch user data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserData();
   }, []);
 
@@ -44,7 +44,7 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100  sm:p-4 flex items-center justify-center font-inter">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 sm:p-4 flex items-center justify-center font-inter">
       <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg border border-gray-100">
         <div className="p-4 sm:p-6 space-y-6">
           {/* Header */}
@@ -62,7 +62,8 @@ const UserDashboard = () => {
                 Welcome, {user.email.split("@")[0]}!
               </h3>
               <p className="text-sm text-gray-500">
-                Role: <span className="font-medium text-purple-600">{user.role}</span>
+                Role:{" "}
+                <span className="font-medium text-purple-600">{user.role}</span>
               </p>
             </div>
           </div>
@@ -133,7 +134,19 @@ const UserDashboard = () => {
 
             {user.chefRequest.status === "none" && (
               <div className="text-center">
-                <RequestChefAccess />
+                <RequestChefAccess
+                  onUpdate={async () => {
+                    try {
+                      const token = localStorage.getItem("token");
+                      const res = await axios.get("/users/me", {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      setUser(res.data);
+                    } catch (err) {
+                      console.error("Failed to refresh user data", err);
+                    }
+                  }}
+                />
               </div>
             )}
 
@@ -158,32 +171,36 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Modal */}
-    {showPreferenceModal && (
-  <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div className="bg-white rounded-xl shadow-xl p-4 w-full max-w-md relative">
-      <button
-        onClick={() => setShowPreferenceModal(false)}
-        className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
-      >
-        ✕
-      </button>
+      {/* Preference Modal */}
+      {showPreferenceModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl p-4 w-full max-w-md relative">
+            <button
+              onClick={() => setShowPreferenceModal(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
+            >
+              ✕
+            </button>
 
-      {/* Pass callbacks */}
-      <UpdatePreferencesForm
-        onClose={() => setShowPreferenceModal(false)}
-        onUpdate={(updatedPreferences) => {
-          setUser((prevUser) => ({
-            ...prevUser,
-            preferences: updatedPreferences,
-          }));
-          setShowPreferenceModal(false); // close the modal
-        }}
-      />
-    </div>
-  </div>
-)}
-
+            <UpdatePreferencesForm
+              onClose={() => setShowPreferenceModal(false)}
+              onUpdate={async () => {
+                try {
+                  const token = localStorage.getItem("token");
+                  const res = await axios.get("/users/me", {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  setUser(res.data);
+                } catch (err) {
+                  console.error("Failed to refresh user data", err);
+                } finally {
+                  setShowPreferenceModal(false);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
