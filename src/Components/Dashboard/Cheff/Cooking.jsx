@@ -1,91 +1,85 @@
 import { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
 import axios from "../../utils/axios";
+import CookingSessionComponent from "./CookingSessionComponent";
 
-const CookingSessionManager = () => {
+const Cooking = () => {
     const [activeSessions, setActiveSessions] = useState([]);
-    const [steps, setSteps] = useState([]);
     const [recipes, setRecipes] = useState([]);
     const [selectedRecipeId, setSelectedRecipeId] = useState("");
     const [message, setMessage] = useState("");
     const [userRole, setUserRole] = useState("");
     const [chefId, setChefId] = useState("");
+    const [connected, setConnected] = useState(false); // Track socket connection
 
     const socketRef = useRef(null);
 
-    // Load user info once on mount
     useEffect(() => {
         loadUserFromLocalStorage();
     }, []);
 
-    // When chefId is available, fetch data and setup WebSocket
     useEffect(() => {
         if (chefId) {
             fetchActiveSessions();
             fetchRecipes();
-            setupWebSocket();
+            setupSocketIO();
         }
 
-        // Cleanup WebSocket on unmount or when chefId changes
         return () => {
             if (socketRef.current) {
-                socketRef.current.close();
+                console.log("Disconnecting socket...");
+                socketRef.current.disconnect();
                 socketRef.current = null;
+                setConnected(false);
             }
         };
     }, [chefId]);
 
-    const setupWebSocket = () => {
-        if (socketRef.current) return;
+    const setupSocketIO = () => {
+        if (socketRef.current) {
+            console.log("Socket already initialized.");
+            return;
+        }
 
-        const WS_URL =
+        const SOCKET_URL =
             process.env.NODE_ENV === "production"
-                ? "wss://your-production-url/ws"
-                : "ws://localhost:5000/ws";
+                ? "https://your-production-url"
+                : "http://localhost:5000";
 
-        socketRef.current = new WebSocket(WS_URL);
+        const token = localStorage.getItem("token");
 
-        socketRef.current.onopen = () => {
-            console.log("WebSocket connected");
-            socketRef.current.send(
-                JSON.stringify({
-                    type: "IDENTIFY",
-                    userId: chefId,
-                    role: userRole,
-                })
-            );
-        };
+        console.log("Initializing socket with token:", token);
 
-        socketRef.current.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
+        const socket = io(SOCKET_URL, {
+            transports: ["websocket"],
+            auth: {},
+            Authorization: {
+                token: token ? `Bearer ${token}` : "",
+            },
+        });
 
-                switch (data.type) {
-                    case "ACTIVE_SESSIONS":
-                        setActiveSessions(data.sessions);
-                        break;
-                    case "NEW_STEP":
-                        if (data.sessionId === selectedRecipeId) {
-                            setSteps((prev) => [...prev, data.step]);
-                        }
-                        break;
-                    default:
-                        console.warn("Unhandled message type:", data.type);
-                        break;
-                }
-            } catch (err) {
-                console.error("Error parsing WS message", err);
-            }
-        };
+        socket.on("connect", () => {
+            console.log("Socket.IO connected:", socket.id);
+            setConnected(true);
+            socket.emit("IDENTIFY", { userId: chefId, role: userRole });
+        });
 
-        socketRef.current.onerror = (err) => {
-            console.error("WebSocket error", err);
-        };
+        socket.on("disconnect", (reason) => {
+            console.warn("Socket.IO disconnected:", reason);
+            setConnected(false);
+        });
 
-        socketRef.current.onclose = () => {
-            console.log("WebSocket disconnected. Reconnecting in 3 seconds...");
-            socketRef.current = null;
-            setTimeout(setupWebSocket, 3000);
-        };
+        socket.on("connect_error", (err) => {
+            console.error("Socket.IO connection error:", err);
+            setConnected(false);
+        });
+
+        socket.on("ACTIVE_SESSIONS", (data) => {
+            console.log("Received ACTIVE_SESSIONS:", data);
+            setActiveSessions(data.sessions);
+        });
+
+        socketRef.current = socket;
     };
 
     const loadUserFromLocalStorage = () => {
@@ -94,6 +88,7 @@ const CookingSessionManager = () => {
             if (userData?._id && userData?.role) {
                 setChefId(userData._id);
                 setUserRole(userData.role.toLowerCase());
+                console.log("Loaded user from localStorage:", userData);
             } else {
                 console.error("Invalid user data in localStorage", userData);
             }
@@ -105,6 +100,7 @@ const CookingSessionManager = () => {
     const fetchActiveSessions = async () => {
         try {
             const res = await axios.get("/recipes/active-sessions");
+            console.log("Fetched active sessions:", res.data);
             setActiveSessions(res.data);
         } catch (err) {
             console.error("Error fetching active sessions:", err);
@@ -114,6 +110,7 @@ const CookingSessionManager = () => {
     const fetchRecipes = async () => {
         try {
             const res = await axios.get(`/recipes/chef/${chefId}`);
+            console.log("Fetched recipes for chef:", res.data);
             setRecipes(res.data);
         } catch (err) {
             console.error("Error fetching chef recipes:", err);
@@ -129,6 +126,7 @@ const CookingSessionManager = () => {
         try {
             await axios.post(`/cooking/${selectedRecipeId}/start-session`);
             setMessage("✅ Session started");
+            fetchActiveSessions();
         } catch (err) {
             console.error("Error starting session:", err);
             setMessage("❌ Failed to start session");
@@ -139,29 +137,20 @@ const CookingSessionManager = () => {
         try {
             await axios.post(`/recipes/${id}/end-session`);
             setMessage("✅ Session ended");
+            fetchActiveSessions();
         } catch (err) {
             console.error("Error ending session:", err);
             setMessage("❌ Failed to end session");
         }
     };
 
-    const fetchSteps = async (id) => {
-        try {
-            const res = await axios.get(`/cooking/${id}`);
-            setSteps(res.data);
-            setSelectedRecipeId(id);
+    const handleViewSteps = (recipeId) => {
+        setSelectedRecipeId(recipeId);
+    };
 
-            if (
-                socketRef.current &&
-                socketRef.current.readyState === WebSocket.OPEN
-            ) {
-                socketRef.current.send(
-                    JSON.stringify({ type: "JOIN_SESSION", sessionId: id })
-                );
-            }
-        } catch (err) {
-            console.error("Error fetching steps:", err);
-        }
+    const getRecipeChefIdById = (recipeId) => {
+        const recipe = activeSessions.find((r) => r._id === recipeId);
+        return recipe?.chefId?._id || recipe?.chefId || "";
     };
 
     if (!userRole) {
@@ -222,7 +211,7 @@ const CookingSessionManager = () => {
                                         </button>
                                         <button
                                             onClick={() =>
-                                                fetchSteps(recipe._id)
+                                                handleViewSteps(recipe._id)
                                             }
                                             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
                                         >
@@ -236,7 +225,7 @@ const CookingSessionManager = () => {
                 )}
             </section>
 
-            {/* Only for chefs */}
+            {/* Start New Session (Chef only) */}
             {userRole === "chef" && (
                 <section className="mb-8">
                     <h3 className="text-xl font-semibold mb-2">
@@ -267,27 +256,20 @@ const CookingSessionManager = () => {
                 </section>
             )}
 
-            {/* Steps Viewer */}
-            {steps.length > 0 && (
-                <section>
-                    <h3 className="text-xl font-semibold mb-2">
-                        Steps for Recipe ID: {selectedRecipeId}
-                    </h3>
-                    <ul className="space-y-2 bg-gray-50 p-4 rounded shadow-inner">
-                        {steps.map((step, index) => (
-                            <li
-                                key={index}
-                                className="border-b py-2 text-sm text-gray-700"
-                            >
-                                <strong>{step.step}</strong> — by {step.by} at{" "}
-                                {new Date(step.at).toLocaleString()}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
+            {/* Live Steps Viewer */}
+            {selectedRecipeId && (
+                <div className="mt-8">
+                    <CookingSessionComponent
+                        recipeId={selectedRecipeId}
+                        socketRef={socketRef}
+                        userId={chefId}
+                        chefId={getRecipeChefIdById(selectedRecipeId)}
+                        connected={connected} // pass down connection status
+                    />
+                </div>
             )}
         </div>
     );
 };
 
-export default CookingSessionManager;
+export default Cooking;
