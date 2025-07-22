@@ -381,7 +381,10 @@ const AllRecipes = () => {
                                             >
                                                 <span className="text-gray-800 text-sm flex-grow pr-4">
                                                     <strong className="text-gray-900">
-                                                        {c.user || "Anonymous"}:
+                                                        {c.user?.name ||
+                                                            c.user?.email ||
+                                                            "Anonymous"}
+                                                        :
                                                     </strong>{" "}
                                                     {c.text}
                                                 </span>
