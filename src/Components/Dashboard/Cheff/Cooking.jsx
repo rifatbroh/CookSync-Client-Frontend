@@ -34,9 +34,8 @@ const CookingSessionManager = () => {
         };
     }, [chefId]);
 
-    // Setup WebSocket connection and handlers
     const setupWebSocket = () => {
-        if (socketRef.current) return; // Skip if WebSocket already initialized
+        if (socketRef.current) return;
 
         const WS_URL =
             process.env.NODE_ENV === "production"
@@ -47,10 +46,9 @@ const CookingSessionManager = () => {
 
         socketRef.current.onopen = () => {
             console.log("WebSocket connected");
-            // Send identification message once connected
             socketRef.current.send(
                 JSON.stringify({
-                    type: "IDENTIFY", // This should match the backend expectation
+                    type: "IDENTIFY",
                     userId: chefId,
                     role: userRole,
                 })
@@ -86,7 +84,7 @@ const CookingSessionManager = () => {
         socketRef.current.onclose = () => {
             console.log("WebSocket disconnected. Reconnecting in 3 seconds...");
             socketRef.current = null;
-            setTimeout(setupWebSocket, 3000); // Attempt reconnect
+            setTimeout(setupWebSocket, 3000);
         };
     };
 
@@ -131,7 +129,6 @@ const CookingSessionManager = () => {
         try {
             await axios.post(`/cooking/${selectedRecipeId}/start-session`);
             setMessage("✅ Session started");
-            // activeSessions will update via WebSocket event
         } catch (err) {
             console.error("Error starting session:", err);
             setMessage("❌ Failed to start session");
@@ -142,7 +139,6 @@ const CookingSessionManager = () => {
         try {
             await axios.post(`/recipes/${id}/end-session`);
             setMessage("✅ Session ended");
-            // activeSessions will update via WebSocket event
         } catch (err) {
             console.error("Error ending session:", err);
             setMessage("❌ Failed to end session");
@@ -155,7 +151,6 @@ const CookingSessionManager = () => {
             setSteps(res.data);
             setSelectedRecipeId(id);
 
-            // Tell backend to send live step updates for this session
             if (
                 socketRef.current &&
                 socketRef.current.readyState === WebSocket.OPEN
@@ -196,30 +191,30 @@ const CookingSessionManager = () => {
                     <p className="text-gray-600">No active sessions.</p>
                 ) : (
                     <ul className="space-y-3">
-                        {activeSessions.map((session) => (
+                        {activeSessions.map((recipe) => (
                             <li
-                                key={session._id}
+                                key={recipe._id}
                                 className="border p-4 rounded shadow-sm bg-white"
                             >
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                     <div>
                                         <p className="text-sm text-gray-700">
                                             <span className="font-medium">
-                                                Recipe ID:
+                                                Title:
                                             </span>{" "}
-                                            {session.recipeId}
+                                            {recipe.title}
                                         </p>
                                         <p className="text-sm text-gray-700">
                                             <span className="font-medium">
                                                 Started By:
                                             </span>{" "}
-                                            {session.userId?.email}
+                                            {recipe.chefId?.email || "Unknown"}
                                         </p>
                                     </div>
                                     <div className="flex gap-2 mt-2 sm:mt-0">
                                         <button
                                             onClick={() =>
-                                                endSession(session.recipeId)
+                                                endSession(recipe._id)
                                             }
                                             className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
                                         >
@@ -227,7 +222,7 @@ const CookingSessionManager = () => {
                                         </button>
                                         <button
                                             onClick={() =>
-                                                fetchSteps(session.recipeId)
+                                                fetchSteps(recipe._id)
                                             }
                                             className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
                                         >
