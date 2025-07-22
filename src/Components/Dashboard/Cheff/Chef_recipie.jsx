@@ -20,23 +20,21 @@ const loadUserFromLocalStorage = () => {
 export default function RecipeList() {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [chefId, setChefId] = useState(null); // state to hold the chef ID
-    const [userRole, setUserRole] = useState(null); // state to hold the user role
+    const [chefId, setChefId] = useState(null);
+    const [userRole, setUserRole] = useState(null);
 
     useEffect(() => {
-        const user = loadUserFromLocalStorage(); // Get the user data from localStorage
-
+        const user = loadUserFromLocalStorage();
         if (user) {
             setChefId(user._id);
-            setUserRole(user.role.toLowerCase()); // Set chefId and userRole state
-            fetchRecipes(user._id, user.token); // Fetch recipes with the user data
+            setUserRole(user.role.toLowerCase());
+            fetchRecipes(user._id, user.token);
         } else {
             console.log("User or token not found in localStorage.");
             setLoading(false);
         }
-    }, []); // Empty dependency array to run only once
+    }, []);
 
-    // Function to fetch recipes using the chef ID
     const fetchRecipes = async (chefId, token) => {
         try {
             const res = await axios.get(`/recipes/chef/${chefId}`, {
@@ -45,10 +43,7 @@ export default function RecipeList() {
                 },
             });
 
-            console.log("API response:", res.data); // Log the response to check the data
-
             if (res.status === 200) {
-                // Format recipes with default values if missing
                 const formattedRecipes = res.data.map((recipe) => ({
                     ...recipe,
                     nutrition: recipe.nutrition || {
@@ -61,7 +56,7 @@ export default function RecipeList() {
                     instructions: recipe.instructions || [],
                     imageUrl: recipe.imageUrl || "",
                 }));
-                setRecipes(formattedRecipes); // Update recipes state
+                setRecipes(formattedRecipes);
             } else {
                 console.error(
                     "Failed to fetch recipes with status:",
@@ -71,15 +66,14 @@ export default function RecipeList() {
         } catch (err) {
             console.error("Error fetching chef recipes:", err);
         } finally {
-            setLoading(false); // Set loading to false once the fetch is done
+            setLoading(false);
         }
     };
 
-    // Handle recipe update (PUT request)
     const handleUpdateRecipe = async (recipeId) => {
         try {
-            const updatedRecipe = { title: "Updated Recipe Title" }; // Example of an updated field
-            const token = localStorage.getItem("token"); // Get the token from localStorage
+            const updatedRecipe = { title: "Updated Recipe Title" };
+            const token = localStorage.getItem("token");
 
             const res = await axios.put(`/recipes/${recipeId}`, updatedRecipe, {
                 headers: {
@@ -88,13 +82,12 @@ export default function RecipeList() {
             });
 
             if (res.status === 200) {
-                // Update the recipes list with the updated recipe data
                 const updatedRecipes = recipes.map((recipe) =>
                     recipe._id === recipeId
                         ? { ...recipe, ...updatedRecipe }
                         : recipe
                 );
-                setRecipes(updatedRecipes); // Update the state with the new recipe data
+                setRecipes(updatedRecipes);
                 console.log("Recipe updated successfully:", res.data);
             }
         } catch (err) {
@@ -102,10 +95,9 @@ export default function RecipeList() {
         }
     };
 
-    // Handle recipe deletion (DELETE request)
     const handleDeleteRecipe = async (recipeId) => {
         try {
-            const token = localStorage.getItem("token"); // Get the token from localStorage
+            const token = localStorage.getItem("token");
 
             const res = await axios.delete(`/recipes/${recipeId}`, {
                 headers: {
@@ -114,11 +106,10 @@ export default function RecipeList() {
             });
 
             if (res.status === 200) {
-                // Remove the deleted recipe from the state
                 const updatedRecipes = recipes.filter(
                     (recipe) => recipe._id !== recipeId
                 );
-                setRecipes(updatedRecipes); // Update the state with the remaining recipes
+                setRecipes(updatedRecipes);
                 console.log("Recipe deleted successfully:", res.data);
             }
         } catch (err) {
@@ -126,102 +117,123 @@ export default function RecipeList() {
         }
     };
 
-    console.log("Current recipes state:", recipes);
-
     return (
-        <div>
-            <h1>Your Recipes</h1>
-            {loading ? (
-                <p>Loading...</p>
-            ) : recipes.length === 0 ? (
-                <p>No recipes available.</p>
-            ) : (
-                <div>
-                    {recipes.map((recipe) => (
-                        <div key={recipe._id} className="recipe-card">
-                            <h2>{recipe.title || "Untitled"}</h2>
-                            <p>
-                                {recipe.description ||
-                                    "No description provided"}
-                            </p>
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-8">
+                My Recipes
+            </h1>
 
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+            ) : recipes.length === 0 ? (
+                <div className="bg-gray-100 rounded-lg p-8 text-center">
+                    <p className="text-gray-600 text-lg">
+                        No recipes available.
+                    </p>
+                    <button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition duration-200">
+                        Create New Recipe
+                    </button>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {recipes.map((recipe) => (
+                        <div
+                            key={recipe._id}
+                            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                        >
                             {recipe.imageUrl && (
                                 <img
                                     src={recipe.imageUrl}
                                     alt={recipe.title}
-                                    className="recipe-image"
-                                    width="200"
+                                    className="w-full h-48 object-cover"
                                 />
                             )}
 
-                            <div>
-                                <h3>Ingredients</h3>
-                                <ul>
-                                    {recipe.ingredients.length > 0 ? (
-                                        recipe.ingredients.map(
-                                            (ingredient, index) => (
-                                                <li key={index}>
-                                                    {ingredient}
-                                                </li>
-                                            )
-                                        )
-                                    ) : (
-                                        <li>No ingredients listed.</li>
-                                    )}
-                                </ul>
-                            </div>
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {recipe.title || "Untitled"}
+                                </h2>
+                                <p className="text-gray-600 mb-4">
+                                    {recipe.description ||
+                                        "No description provided"}
+                                </p>
 
-                            <div>
-                                <h3>Instructions</h3>
-                                {recipe.instructions.length > 0 ? (
-                                    <ol>
-                                        {recipe.instructions.map(
-                                            (step, index) => (
-                                                <li key={index}>{step}</li>
+                                <div className="mb-4">
+                                    <h3 className="font-medium text-gray-700 mb-2">
+                                        Ingredients
+                                    </h3>
+                                    <ul className="list-disc list-inside text-gray-600 space-y-1">
+                                        {recipe.ingredients.length > 0 ? (
+                                            recipe.ingredients.map(
+                                                (ingredient, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="text-sm"
+                                                    >
+                                                        {ingredient}
+                                                    </li>
+                                                )
                                             )
+                                        ) : (
+                                            <li className="text-sm text-gray-500">
+                                                No ingredients listed.
+                                            </li>
                                         )}
-                                    </ol>
-                                ) : (
-                                    <p>No instructions provided.</p>
-                                )}
-                            </div>
+                                    </ul>
+                                </div>
 
-                            <div>
-                                <h3>Nutrition</h3>
-                                <ul>
-                                    <li>
-                                        Calories:{" "}
-                                        {recipe.nutrition.calories || "N/A"}
-                                    </li>
-                                    <li>
-                                        Protein:{" "}
-                                        {recipe.nutrition.protein || "N/A"}
-                                    </li>
-                                    <li>
-                                        Carbs: {recipe.nutrition.carbs || "N/A"}
-                                    </li>
-                                    <li>
-                                        Fats: {recipe.nutrition.fats || "N/A"}
-                                    </li>
-                                </ul>
-                            </div>
+                                <div className="mb-4">
+                                    <h3 className="font-medium text-gray-700 mb-2">
+                                        Nutrition
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div className="bg-gray-50 p-2 rounded">
+                                            <span className="font-medium">
+                                                Calories:
+                                            </span>{" "}
+                                            {recipe.nutrition.calories || "N/A"}
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded">
+                                            <span className="font-medium">
+                                                Protein:
+                                            </span>{" "}
+                                            {recipe.nutrition.protein || "N/A"}g
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded">
+                                            <span className="font-medium">
+                                                Carbs:
+                                            </span>{" "}
+                                            {recipe.nutrition.carbs || "N/A"}g
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded">
+                                            <span className="font-medium">
+                                                Fats:
+                                            </span>{" "}
+                                            {recipe.nutrition.fats || "N/A"}g
+                                        </div>
+                                    </div>
+                                </div>
 
-                            {/* Add buttons for updating and deleting the recipe */}
-                            <div>
-                                <button
-                                    onClick={() =>
-                                        handleUpdateRecipe(recipe._id)
-                                    }
-                                >
-                                    Update Recipe
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        handleDeleteRecipe(recipe._id)
-                                    }
-                                >
-                                    Delete Recipe
-                                </button>
+                                <div className="flex space-x-2 mt-4">
+                                    <button
+                                        onClick={() =>
+                                            handleUpdateRecipe(recipe._id)
+                                        }
+                                        className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded transition duration-200 text-sm"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            handleDeleteRecipe(recipe._id)
+                                        }
+                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition duration-200 text-sm"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
