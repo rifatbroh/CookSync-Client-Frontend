@@ -174,53 +174,64 @@ const Cooking = () => {
             )}
 
             {/* Active Sessions */}
+            {/* Active Sessions */}
             <section className="mb-8">
                 <h3 className="text-xl font-semibold mb-2">Active Sessions</h3>
                 {activeSessions.length === 0 ? (
                     <p className="text-gray-600">No active sessions.</p>
                 ) : (
                     <ul className="space-y-3">
-                        {activeSessions.map((recipe) => (
-                            <li
-                                key={recipe._id}
-                                className="border p-4 rounded shadow-sm bg-white"
-                            >
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                    <div>
-                                        <p className="text-sm text-gray-700">
-                                            <span className="font-medium">
-                                                Title:
-                                            </span>{" "}
-                                            {recipe.title}
-                                        </p>
-                                        <p className="text-sm text-gray-700">
-                                            <span className="font-medium">
-                                                Started By:
-                                            </span>{" "}
-                                            {recipe.chefId?.email || "Unknown"}
-                                        </p>
+                        {activeSessions.map((recipe) => {
+                            const sessionCreatorId =
+                                recipe.chefId?._id || recipe.chefId;
+                            const isSessionCreator =
+                                chefId === sessionCreatorId;
+
+                            return (
+                                <li
+                                    key={recipe._id}
+                                    className="border p-4 rounded shadow-sm bg-white"
+                                >
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div>
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-medium">
+                                                    Title:
+                                                </span>{" "}
+                                                {recipe.title}
+                                            </p>
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-medium">
+                                                    Started By:
+                                                </span>{" "}
+                                                {recipe.chefId?.email ||
+                                                    "Unknown"}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2 mt-2 sm:mt-0">
+                                            {isSessionCreator && (
+                                                <button
+                                                    onClick={() =>
+                                                        endSession(recipe._id)
+                                                    }
+                                                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                                                >
+                                                    End
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() =>
+                                                    handleViewSteps(recipe._id)
+                                                }
+                                                className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+                                            >
+                                                View Steps
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-2 mt-2 sm:mt-0">
-                                        <button
-                                            onClick={() =>
-                                                endSession(recipe._id)
-                                            }
-                                            className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
-                                        >
-                                            End
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                handleViewSteps(recipe._id)
-                                            }
-                                            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-                                        >
-                                            View Steps
-                                        </button>
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
+                                </li>
+                            );
+                        })}
                     </ul>
                 )}
             </section>
