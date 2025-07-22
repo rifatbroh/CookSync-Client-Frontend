@@ -29,7 +29,7 @@ const Header = () => {
     localStorage.removeItem("token");
     setUser(null);
     setDropdownOpen(false);
-    navigate("/"); // ✅ logout goes to home
+    navigate("/"); 
   };
 
   const handleDashboard = () => {
@@ -45,7 +45,7 @@ const Header = () => {
     const updatedUser = JSON.parse(localStorage.getItem("user"));
     setUser(updatedUser);
     setShowLogin(false);
-    navigate("/"); // ✅ login always goes to home
+    navigate("/");
   };
 
   return (
